@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 import Login from './components/LoginPage.vue'
+import Logon from './components/LogonPage.vue'
 import Home from './components/HomePage.vue'
 
 Vue.use(Router)
@@ -10,7 +11,9 @@ const router = new Router({
 	mode: 'history',
 	routes: [
 		{ path: '/login', name: 'Login', component: Login },
+		{ path: '/logon', name: 'Logon', component: Logon },
 		{ path: '/home', name: 'Home', component: Home },
+
 	]
 })
 

@@ -36,9 +36,9 @@
       "parser": "babel-eslint"
     },
     "rules": {
-		"no-console": "off",
-		"no-irregular-whitespace": "off"
-	}
+      "no-console": "off",
+      "no-irregular-whitespace": "off"
+    }
   },
   "browserslist": [
     "> 1%",

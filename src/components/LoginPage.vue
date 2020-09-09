@@ -12,7 +12,7 @@
 				<br><br>
 				<Button type="success" long @click="submit" size="large" class="btn">登录</Button>
 				<br><br>
-				<Button type="success" long @click="submit" size="large" class="btn" ghost>注册</Button>
+				<Button type="success" long @click="logon" size="large" class="btn" ghost>注册</Button>
 			</div>
 		</div>
 	</div>
@@ -31,6 +31,9 @@ export default {
 		submit() {
 			console.log(this.username)
 			console.log(this.password)
+		},
+		logon() {
+			this.$router.push('/logon')
 		}
 	}
 }
