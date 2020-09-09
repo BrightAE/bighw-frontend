@@ -13,7 +13,13 @@
                                     设备管理
                                 </MenuItem>
                                 <MenuItem name="rents">
-                                    租借管理
+                                    租借历史
+                                </MenuItem>
+                                <MenuItem name="rent_requests">
+                                    租借申请管理
+                                </MenuItem>
+                                <MenuItem name="equip_requests">
+                                    设备上架管理
                                 </MenuItem>
                             </Menu>
                     </div>
@@ -32,21 +38,29 @@
                                                 { title: '学号', key: 'student_id'},
                                                 { title: '邮箱', key: 'email'},
                                                 { title: '联系方式', key: 'contact' },
-                                                { title: '权限', key: 'authority' },
+                                                { title: '权限', slot: 'authority' },
                                                 { title: '实验室信息', key: 'lab_info' },
-                                                { title: '操作', key: 'action',render: (h, params) => {return h('div', [
-                                                    h('Button', {props: {type: 'primary',size: 'small' },style:{width:'120px',margin:'3px'},on: {click: () => {}}}, '设为普通用户'),
-                                                    h('Button', {props: {type: 'primary',size: 'small' },style:{width:'120px',margin:'3px'},on: {click: () => {}}}, '设为设备提供者'),
-                                                    h('Button', {props: {type: 'error',size: 'small' },style:{width:'120px',margin:'3px'},on: {click: () => {}}}, '删除用户')]);}
-                                                }
+                                                { title: '操作', slot: 'action'}
                                             ]" :data="users">
+                                <template slot-scope="{row}" slot="authority">
+                                    <div v-if='row.authority=="admin"'>管理员</div>
+                                    <div v-if='row.authority=="lessor"'>设备供应者</div>
+                                    <div v-if='row.authority=="user"'>普通用户</div>
+                                </template>
+                                <template slot-scope="{row}" slot="action">
+                                    <div v-if='row.authority!="admin"'>
+                                        <Button v-if='row.authority!="user"' type="primary" size="small" style="width:120px;margin:3px;" @click="set_authority(row.student_id,'user')">设为普通用户</Button>
+                                        <Button v-if='row.authority!="lessor"' type="primary" size="small" style="width:120px;margin:3px;" @click="set_authority(row.student_id,'lessor')">设为设备提供者</Button>
+                                        <Button type="error" size="small" style="width:120px;margin:3px;" @click="delete_user(row.student_id)">删除用户</Button>
+                                    </div>
+                                </template>
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
                         </div>
                         <div v-if='status=="equips"'>
                             <div style='display:flex;flex-direction:row;'>
                                 <Select v-model="equips_filter.status" style="width:150px" @on-change='equips_manage'>
-                                    <Option value="none">全部</Option>
+                                    <Option value="all">全部</Option>
                                     <Option value="onsale">可租</Option>
                                     <Option value="rented">已租</Option>
                                     <Option value="unavailable">下架</Option>
@@ -55,39 +69,110 @@
                                 <Input v-model="equips_filter.lessor_name" search placeholder="租借方名字" style='width:300px' @on-search='equips_manage'/>
                                 <Input v-model="equips_filter.lessor_id" search placeholder="租借方id" style='width:300px' @on-search='equips_manage'/>
                             </div>
-                            <Table :columns="[  { title: '设备名', key: 'equip_name'},
+                            <br>
+                            <Table :columns="[  { title: '设备编号', key: 'equip_id'},
+                                                { title: '设备名', key: 'equip_name'},
                                                 { title: '提供者', key: 'lessor_name'},
                                                 { title: '地址', key: 'address'},
-                                                { title: '截至日期', key: 'end_time' },
+                                                { title: '截止日期', key: 'end_time' },
                                                 { title: '联系方式', key: 'contact' },
-                                                { title: '设备状态', key: 'status' },
-                                                { title: '操作', key: 'action',render: (h, params) => {return h('div', [
-                                                    h('Button', {props: {type: 'primary',size: 'small' },style:{width:'120px',margin:'3px'},on: {click: () => {}}}, '修改设备信息'),
-                                                    h('Button', {props: {type: 'error',size: 'small' },style:{width:'120px',margin:'3px'},on: {click: () => {}}}, '删除设备')]);}
-                                                }
+                                                { title: '设备状态', slot: 'status' },
+                                                { title: '操作', slot: 'action' }
                                             ]" :data="equips">
+                                <template slot-scope="{row}" slot="status">
+                                    <div v-if='row.status=="onsale"'>可租</div>
+                                    <div v-if='row.status=="rented"'>已租</div>
+                                    <div v-if='row.status=="unavailable"'>下架</div>
+                                </template>
+                                <template slot-scope="{row}" slot="action">
+                                    <Button type="primary" size="small" style="width:120px;margin:3px;" @click="()=>{equips_dialog=true;equip_modify.equip_id=row.equip_id;equip_modify.name=row.equip_name;equip_modify.address=row.address;equip_modify.end_time=row.end_time;equip_modify.status=row.status;}">修改设备信息</Button>
+                                    <Button type="error" size="small" style="width:120px;margin:3px;" @click="delete_equip(row.equip_id)">删除设备</Button>
+                                    <Modal v-model="equips_dialog"
+                                        title="设备信息修改"
+                                        @on-ok="set_equip()"
+                                        @on-cancel="equips_dialog=false">
+                                        设备名称:<Input v-model="equip_modify.name" clearable style="width: 300px;margin:8px;" size="large"/><br>
+                                        设备地址:<Input v-model="equip_modify.address"  clearable style="width: 300px;margin:8px;" size="large"/><br>
+                                        截止日期:<Input v-model="equip_modify.end_time" clearable style="width: 300px;margin:8px;" size="large"/><br>
+                                        租借状态:
+                                        <Select v-model="equip_modify.status" style="width:150px;margin:4px;">
+                                            <Option value="onsale">可租</Option>
+                                            <Option value="rented">已租</Option>
+                                            <Option value="unavailable">下架</Option>
+                                        </Select>
+                                    </Modal>
+                                </template>
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
                         </div>
                         <div v-if='status=="rents"'>
+                            <div style='display:flex;flex-direction:row;'>
+                                <Input v-model="rents_filter.equip_id" search placeholder="设备编号" style='width:300px' @on-search='rents_manage'/>
+                                <Input v-model="rents_filter.lessor_id" search placeholder="租借方id" style='width:300px' @on-search='rents_manage'/>
+                                <Input v-model="rents_filter.lessor_name" search placeholder="租借方名字" style='width:300px' @on-search='rents_manage'/>
+                            </div>
+                            <br>
+                            <Table :columns="[  { title: '设备编号', key: 'equip_id'},
+                                                { title: '设备名称', key: 'equip_name'},
+                                                { title: '供应方', key: 'lessor_name'},
+                                                { title: '租方', key: 'user_name'},
+                                                { title: '租借时间', key: 'rent_time' },
+                                                { title: '归还时间', key: 'return_time' },
+                                                { title: '截止日期', key: 'end_time' },
+                                                { title: '状态', slot: 'status' },
+                                            ]" :data="rents">
+                                <template slot-scope="{row}" slot="status">
+                                    <div v-if='row.status=="onsale"'>可租</div>
+                                    <div v-if='row.status=="rented"'>已租</div>
+                                    <div v-if='row.status=="unavailable"'>下架</div>
+                                </template>
+                            </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
-                            <card v-for='rent in rents' :key='rent'>
-                                <div style='display:flex;flex-direction:row;'>
-                                    <div class='info' style='width:30%;text-align:left;'>
-                                        设备编号:{{rent.equip_id}}<br>
-                                        设备名称:{{rent.equip_name}}<br>
-                                        供应方:{{rent.lessor_name}}<br>
-                                        租方:{{rent.user_name}}<br>
-                                        租借时间:{{rent.rent_time}}<br>
-                                        归还时间:{{rent.return_time}}<br>
-                                        状态:{{rent.status}}<br>
-                                    </div>
-                                    <div class='operation' style='width:100%;justify-content: flex-end;'>
-                                        <Button type="primary" style='width:20%' ghost>通过申请</Button><br>
-                                        <Button type="primary" style='width:20%' ghost>拒绝申请</Button><br>
-                                    </div>
-                                </div>
-                            </card>
+                        </div>
+                        <div v-if='status=="rent_requests"'>
+                            <div style='display:flex;flex-direction:row;'>
+                                <Input v-model="rent_requests_filter.lessor_name" search placeholder="借方名字" style='width:200px' @on-search='rent_requests_manage'/>
+                                <Input v-model="rent_requests_filter.lessor_id" search placeholder="借方id" style='width:200px' @on-search='rent_requests_manage'/>
+                                <Input v-model="rent_requests_filter.renter_name" search placeholder="租方名字" style='width:200px' @on-search='rent_requests_manage'/>
+                                <Input v-model="rent_requests_filter.renter_id" search placeholder="租房id" style='width:200px' @on-search='rent_requests_manage'/>
+                                <Input v-model="rent_requests_filter.equip_name" search placeholder="设备名字" style='width:200px' @on-search='rent_requests_manage'/>
+                                <Input v-model="rent_requests_filter.equip_id" search placeholder="设备id" style='width:200px' @on-search='rent_requests_manage'/>
+                            </div>
+                            <br>
+                            <Table :columns="[  { title: '设备编号', key: 'equip_id'},
+                                                { title: '设备名', key: 'equip_name'},
+                                                { title: '提供者', key: 'lessor_name'},
+                                                { title: '租借者', key: 'user_name'},
+                                                { title: '租借日期', key: 'rent_time' },
+                                                { title: '归还日期', key: 'return_time' },
+                                                { title: '截止日期', key: 'end_time' },
+                                                { title: '状态', slot: 'status' }
+                                            ]" :data="rent_requests">
+                                <template slot-scope="{row}" slot="status">
+                                    <div v-if='row.status=="returned"'>未归还</div>
+                                    <div v-if='row.status=="unreturned"'>已归还</div>
+                                </template>
+                            </Table>
+                            <Page :total="total" size="small" show-total @on-change='pagechange'/>
+                        </div>
+                        <div v-if='status=="equip_request"'>
+                            <div style='display:flex;flex-direction:row;'>
+                                <Input v-model="equip_request_filter.lessor_name" search placeholder="租借方名字" style='width:300px' @on-search='equip_request_manage'/>
+                                <Input v-model="equip_request_filter.lessor_id" search placeholder="租借方id" style='width:300px' @on-search='equip_request_manage'/>
+                                <Input v-model="equip_request_filter.equip_name" search placeholder="设备名" style='width:300px' @on-search='equip_request_manage'/>
+                            </div>
+                            <br>
+                            <Table :columns="[  { title: '设备编号', key: 'equip_id'},
+                                                { title: '设备名', key: 'equip_name'},
+                                                { title: '截止日期', key: 'end_time'},
+                                                { title: '操作', slot: 'action' }
+                                            ]" :data="equip_requests">
+                                <template slot-scope="{row}" slot="action">
+                                    <Button type="primary" size="small" style="width:120px;margin:3px;" @click="()=>{equips_dialog=true;equip_modify.equip_id=row.equip_id;equip_modify.name=row.equip_name;equip_modify.address=row.address;equip_modify.end_time=row.end_time;equip_modify.status=row.status;}">修改设备信息</Button>
+                                    <Button type="error" size="small" style="width:120px;margin:3px;" @click="delete_equip(row.equip_id)">删除设备</Button>
+                                </template>
+                            </Table>
+                            <Page :total="total" size="small" show-total @on-change='pagechange'/>
                         </div>
 					</Content>
 				</Layout>
@@ -106,11 +191,19 @@ export default {
             status: '',
             total:0,
             page:1,
+            size:10,
             users: [],
             users_filter: 'none',
-            equips_filter:{status:'none',lessor_name:'',lessor_id:'',name_search:''},
+            equips_filter: {status:'all',lessor_name:'',lessor_id:'',name_search:''},
+            equips_dialog: false,
+            equip_modify: {equip_id:'',name:'',address:'',end_time:'',status:''},
             equips: [],
-            rents: []
+            rents: [],
+            rents_filter:{user_id:'',lessor_id:'',equip_id:''},
+            rent_requests: [],
+            rent_requests_filter: {lessor_name:'',lessor_id:'',renter_name:'',renter_id:'',equip_name:'',equip_id:''},
+            equip_requests: [],
+            equip_requests_filter: {lessor_name:'',lessor_id:'',equip_name:''}
         }
     },
     methods: {
@@ -128,6 +221,12 @@ export default {
                 case 'rents':
                     _this.rents_manage();
                     break;
+                case 'rent_requests':
+                    _this.rent_requests_manage();
+                    break;
+                case 'equip_requests':
+                    _this.equip_requests_manage();
+                    break;
             }
         },
         pagechange(new_page){
@@ -143,13 +242,19 @@ export default {
                 case 'rents':
                     _this.rents_manage();
                     break;
+                case 'rent_requests':
+                    _this.rent_requests_manage();
+                    break;
+                case 'equip_requests':
+                    _this.equip_requests_manage();
+                    break;
             }
         },
         users_manage() {
             let _this=this;
             /*let par={
                 page:_this.page,
-                size:_this.size,
+                page_size:_this.size,
                 status:_this.users_filter
             };
             _this.$axios(
@@ -169,7 +274,7 @@ export default {
                     student_id:'shit',
                     email:'damn',
                     contact:'bitch',
-                    authority:'设备提供者',
+                    authority:'lessor',
                     lab_info:'gun'
                 },
                 {
@@ -177,18 +282,78 @@ export default {
                     student_id:'shit',
                     email:'damn',
                     contact:'bitch',
-                    authority:'设备提供者',
+                    authority:'user',
                     lab_info:'gun'
                 }
             ]
+        },
+        set_authority(id,type) {
+            let _this=this;
+            _this.$axios(
+                {
+                    method: 'post',
+                    url: '/api/user/set-authority',
+                    data: {
+                        user_id: id,
+                        authority: type
+                    }
+                }
+            ).then(Response => {
+                if (Response.data.message=='ok') {
+                    _this.$Message.info({
+                        content: '设置成功！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
+                if (Response.data.message=='error') {
+                    _this.$Message.info({
+                        content: '设备关联，设置失败！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
+            }).catch(() => {
+            });
+        },
+        delete_user(id) {
+            let _this=this;
+            _this.$axios(
+                {
+                    method: 'post',
+                    url: '/api/user/delete',
+                    data: {
+                        user_id: id,
+                    }
+                }
+            ).then(Response => {
+                if (Response.data.message=='ok') {
+                    _this.$Message.info({
+                        content: '删除成功！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
+                if (Response.data.message=='error') {
+                    _this.$Message.info({
+                        content: '设备关联，删除失败！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
+            }).catch(() => {
+            });
         },
         equips_manage() {
             let _this=this;
             /*let par={
                 page:_this.page,
-                size:_this.size,
+                page_size:_this.size,
             };
-
+            if (_this.equips_filter.status!='all') par.status=_this.equips_filter.status;
+            if (_this.equips_filter.lessor_name!='') par.lessor_name=_this.equips_filter.lessor_name;
+            if (_this.equips_filter.lessor_id!='') par.lessor_id=_this.equips_filter.lessor_id;
+            if (_this.equips_filter.name_search!='') par.name_search=_this.equips_filter.name_search;
             _this.$axios(
                 {
                     method: 'get',
@@ -202,44 +367,210 @@ export default {
             });*/
             _this.equips=[
                 {
+                    equip_id:'cao',
                     equip_name:'fuck',
-                    student_id:'shit',
-                    email:'damn',
+                    lessor_name:'shit',
+                    address:'damn',
                     contact:'bitch',
-                    authority:'设备提供者',
-                    lab_info:'gun'
+                    end_time:'dick',
+                    status:'onsale'
                 },
                 {
+                    equip_id:'cao',
                     equip_name:'fuck',
-                    student_id:'shit',
-                    email:'damn',
+                    lessor_name:'shit',
+                    address:'damn',
                     contact:'bitch',
-                    authority:'设备提供者',
-                    lab_info:'gun'
+                    end_time:'dick',
+                    status:'rented'
                 }
             ]
+        },
+        set_equip() {
+            let _this=this;
+            _this.$axios(
+                {
+                    method: 'post',
+                    url: '/api/user/set',
+                    data: _this.equip_modify
+                }
+            ).then(Response => {
+                if (Response.data.message=='ok') {
+                    _this.$Message.info({
+                        content: '设置成功！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
+                if (Response.data.message=='error') {
+                    _this.$Message.info({
+                        content: '设备关联，设置失败！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
+            }).catch(() => {
+            });
+        },
+        delete_equip(id) {
+            let _this=this;
+            _this.$axios(
+                {
+                    method: 'post',
+                    url: '/api/equip/delete',
+                    data: {
+                        equip_id: id,
+                    }
+                }
+            ).then(Response => {
+                if (Response.data.message=='ok') {
+                    _this.$Message.info({
+                        content: '删除成功！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
+                if (Response.data.message=='error') {
+                    _this.$Message.info({
+                        content: '正在出租，删除失败！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
+            }).catch(() => {
+            });
         },
         rents_manage() {
             let _this=this;
+            /*let par={
+                page:_this.page,
+                page_size:_this.size,
+            };
+            if (_this.rents_filter.user_id!='') par.user_id=_this.rents_filter.user_id;
+            if (_this.rents_filter.lessor_id!='') par.lessor_id=_this.rents_filter.lessor_id;
+            if (_this.rents_filter.equip_id!='') par.equip_id=_this.rents_filter.equip_id;
+            _this.$axios(
+                {
+                    method: 'get',
+                    url: '/api/rent',
+                    params: par
+                }
+            ).then(Response => {
+                _this.total=Response.data.total;
+                _this.rent=Response.data.rent_info;
+            }).catch(() => {
+            });*/
             _this.rents=[
                 {
-                    equip_name:'fuck',
-                    student_id:'shit',
-                    email:'damn',
-                    contact:'bitch',
-                    authority:'设备提供者',
-                    lab_info:'gun'
+                    equip_id:'fuck',
+                    equip_name:'shit',
+                    lessor_name:'damn',
+                    user_name:'bitch',
+                    rent_time:'cao',
+                    return_time:'gun',
+                    end_time:'gan',
+                    status:'onsale'
                 },
                 {
-                    equip_name:'fuck',
-                    student_id:'shit',
-                    email:'damn',
-                    contact:'bitch',
-                    authority:'设备提供者',
-                    lab_info:'gun'
+                    equip_id:'fuck',
+                    equip_name:'shit',
+                    lessor_name:'damn',
+                    user_name:'bitch',
+                    rent_time:'cao',
+                    return_time:'gun',
+                    end_time:'gan',
+                    status:'rented'
                 }
             ]
         },
+        rent_requests_manage() {
+            let _this=this;
+            /*let par={
+                page:_this.page,
+                page_size:_this.size,
+            };
+            if (_this.rent_requests_filter.lessor_name!='') par.lessor_name=_this.rent_requests_filter.lessor_name;
+            if (_this.rent_requests_filter.lessor_id!='') par.lessor_id=_this.rent_requests_filter.lessor_id;
+            if (_this.rent_requests_filter.renter_name!='') par.renter_name=_this.rent_requests_filter.renter_name;
+            if (_this.rent_requests_filter.renter_id!='') par.renter_id=_this.rent_requests_filter.renter_id;
+            if (_this.rent_requests_filter.equip_name!='') par.equip_name=_this.rent_requests_filter.equip_name;
+            if (_this.rent_requests_filter.equip_id!='') par.equip_id=_this.rent_requests_filter.equip_id;
+            _this.$axios(
+                {
+                    method: 'get',
+                    url: '/api/rent/request/query',
+                    params: par
+                }
+            ).then(Response => {
+                _this.total=Response.data.total;
+                _this.rent_requests=Response.data.rent_requests;
+            }).catch(() => {
+            });*/
+            _this.rent_requests=[
+                {
+                    equip_id:'cao',
+                    equip_name:'fuck',
+                    lessor_name:'shit',
+                    address:'damn',
+                    contact:'bitch',
+                    end_time:'dick',
+                    status:'onsale'
+                },
+                {
+                    equip_id:'cao',
+                    equip_name:'fuck',
+                    lessor_name:'shit',
+                    address:'damn',
+                    contact:'bitch',
+                    end_time:'dick',
+                    status:'rented'
+                }
+            ]
+        },
+        equip_requests_manage() {
+            let _this=this;
+            /*let par={
+                page:_this.page,
+                page_size:_this.size,
+            };
+            if (_this.rent_requests_filter.lessor_name!='') par.lessor_name=_this.rent_requests_filter.lessor_name;
+            if (_this.rent_requests_filter.lessor_id!='') par.lessor_id=_this.rent_requests_filter.lessor_id;
+            if (_this.rent_requests_filter.renter_name!='') par.renter_name=_this.rent_requests_filter.renter_name;
+            if (_this.rent_requests_filter.renter_id!='') par.renter_id=_this.rent_requests_filter.renter_id;
+            if (_this.rent_requests_filter.equip_name!='') par.equip_name=_this.rent_requests_filter.equip_name;
+            if (_this.rent_requests_filter.equip_id!='') par.equip_id=_this.rent_requests_filter.equip_id;
+            _this.$axios(
+                {
+                    method: 'get',
+                    url: '/api/rent/request/query',
+                    params: par
+                }
+            ).then(Response => {
+                _this.total=Response.data.total;
+                _this.rent_requests=Response.data.rent_requests;
+            }).catch(() => {
+            });*/
+            _this.equip_requests_requests=[
+                {
+                    equip_id:'cao',
+                    equip_name:'fuck',
+                    lessor_name:'shit',
+                    address:'damn',
+                    contact:'bitch',
+                    end_time:'dick',
+                    status:'onsale'
+                },
+                {
+                    equip_id:'cao',
+                    equip_name:'fuck',
+                    lessor_name:'shit',
+                    address:'damn',
+                    contact:'bitch',
+                    end_time:'dick',
+                    status:'rented'
+                }
+            ]
+        }
     },
 	components: {
 		myNavigator,
