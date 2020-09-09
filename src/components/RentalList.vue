@@ -7,8 +7,8 @@
 		</div>
 		<div id="tabel">
 			<Table :columns="tablehead" :data="equipdata">
-				<template slot-scope="{ row }" slot="name">
-					<router-link to="/">{{ row.name }}</router-link>
+				<template slot-scope="{ row }" slot="action">
+					<Button type="primary" size="small" style="margin-right: 5px" @click="show(row)">申请租赁</Button>
 				</template>
 			</Table>
 		</div>
@@ -20,11 +20,12 @@
 export default {
 	data() {
 		return { tablehead: [
-			{ title: '设备名称', slot: 'name', sortable: true },
+			{ title: '设备名称', key: 'name', sortable: true },
 			{ title: '设备编号', key: 'equipId', sortable: true },
-			{ title: '租期结束时间', key: 'endtime', sortable: true },
+			{ title: '结束时租期间', key: 'endtime', sortable: true },
 			{ title: '出借方地址', key: 'address' },
 			{ title: '联系方式', key: 'contact' },
+			{ title: '操作', slot: 'action'}
 		], equipdata: [] }
 	},
 	mounted: function() {
@@ -37,6 +38,11 @@ export default {
 				'address': '地址',
 				'contact': '联系',
 			})
+	},
+	methods: {
+		show: function(equip) {
+			console.log(equip)
+		}
 	},
 	components: {
 	}
