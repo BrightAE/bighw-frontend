@@ -1,0 +1,67 @@
+<template>
+	<Menu mode="horizontal" theme="dark" active-name="1">
+        <div class="layout-logo"></div>
+        <div class="layout-hello">清青快租</div>
+        <div class="layout-nav">
+            <Button name="btn1">
+                <Icon type="md-home"></Icon>
+                主页
+            </Button>
+            <Button name="btn2">
+                <Icon type="md-send"></Icon>
+                控制台
+            </Button>
+            <Button name="btn3">
+                <Icon type="md-person"></Icon>
+                管理员
+            </Button>
+            <Button name="btn4">
+                <Icon type="md-log-out"></Icon>
+                登出
+            </Button>
+        </div>
+	</Menu>
+</template>
+
+<script>
+export default {
+	name: 'navigator',
+	data() {
+		return {}
+	}
+}
+</script>
+
+<style scoped>
+    .layout-hello {
+        position: relative;
+        float: left;
+        color: white;
+        left: 40px;
+        font-size: 20px;
+        font-weight: 500;
+        font-family: 'Hiragino Sans GB';
+    }
+    .layout-logo {
+        width: 40px;
+        height: 40px;
+        background: url('../assets/logo.png') no-repeat;
+        background-size: 100% 100%;
+        border-radius: 3px;
+        float: left;
+        position: relative;
+        top: 12px;
+        left: 20px; 
+    }
+
+    .layout-nav {
+        width: 360px;
+        margin: 0 auto;
+        margin-right: 0px;
+    }
+    Button {
+        color: white;
+        background: #515a6e;
+        border: none;
+    };
+</style>
