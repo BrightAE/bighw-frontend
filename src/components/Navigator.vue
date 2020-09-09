@@ -8,14 +8,10 @@
                 主页
             </Button>
             <Button name="btn2">
-                <Icon type="md-send"></Icon>
-                控制台
-            </Button>
-            <Button name="btn3">
                 <Icon type="md-person"></Icon>
                 管理员
             </Button>
-            <Button name="btn4">
+            <Button name="btn3">
                 <Icon type="md-log-out"></Icon>
                 登出
             </Button>
