@@ -3,13 +3,15 @@
         <div class="layout-logo"></div>
         <div class="layout-hello">清青快租</div>
         <div class="layout-nav">
-            <Button name="btn1">
+
+            <Button name="btn1" @click=home>
                 <Icon type="md-home"></Icon>
                 主页
             </Button>
-            <Button name="btn2">
+            <Button  name="btn2" @click=manage>
                 <Icon type="md-person"></Icon>
-                管理员
+                <span v-if='is_admin==true'>管理员</span>
+                <span v-if='is_admin==false'>{{username}}</span>
             </Button>
             <Button name="btn3" @click=logout>
                 <Icon type="md-log-out"></Icon>
@@ -23,7 +25,26 @@
 export default {
 	name: 'navigator',
 	data() {
-		return {}
+		return {
+            username:'',
+            is_admin:false
+        }
+    },
+    mounted: function() {
+        let _this=this;
+        _this.$axios(
+            {
+                method: 'get',
+                url: '/api/user/info',
+                headers: {
+                    jwt: localStorage.getItem('jwt')
+                }
+            }
+        ).then(Response => {
+            if (Response.data.authority=='admin') _this.is_admin=true;
+            else _this.username=Response.data.username;
+        }).catch(() => {
+        });
     },
     methods: {
         logout: function() {
@@ -40,7 +61,13 @@ export default {
                     this.$Message.error('登出失败')
                 }
             })
-        } 
+        },
+        home() {
+            this.$router.push('/home')
+        },
+        manage() {
+            if (this.is_admin===true) this.$router.push('/admin')
+        }
     }
 }
 </script>
