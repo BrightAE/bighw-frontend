@@ -48,13 +48,35 @@ export default {
 	},
 	methods: {
 		submit() {
-			let _this=this;
-			this.$Message.info({
-                content: '已发送激活链接至'+_this.email,
-                duration: 10,
-				closable: true
-            });
-			this.$router.push('/login')
+			if(this.password != this.passwordconfirm) {
+				this.$Message.error('密码输入不一致')
+				return
+			}
+			if(this.username === '') {
+				this.$Message.error('用户名不能为空')
+				return
+			}
+			if(this.password.length < 6) {
+				this.$Message.error('密码不能少于 6 位')
+				return
+			}
+			let reqBody = this.$qs.stringify({
+				'username': this.username,
+				'password': this.password,
+				'student_id': this.student_id,
+				'email': this.email,
+				'contact': this.contact
+			})
+			this.$axios.post('/api/logon', reqBody).then(response => {
+				if(response.data.message === 'ok') {
+					this.$Message.info('已发送激活链接至'+this.email);
+					this.$router.push('/login')
+				} else {
+					this.$Message.error('注册失败')
+				}
+
+			})
+
 		},
 		back(){
 			this.$router.push('/login')
