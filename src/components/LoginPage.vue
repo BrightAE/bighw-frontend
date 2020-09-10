@@ -36,7 +36,7 @@ export default {
 			this.$axios.post('/api/login', reqBody).then(response => {
 				if(response.data.message === 'ok') {
 					this.$Message.success('登录成功！')
-					this.$asyncLocalStorage.setItem('jwt', response.data.jwt);
+					localStorage.setItem('jwt', response.data.jwt);
 					this.$router.push('/home')
 				} else {
 					this.$Message.error('登陆失败')

@@ -14,16 +14,16 @@
 						<MenuItem name="history">
 							申请历史
 						</MenuItem>
-						<MenuItem name="assistant">
+						<MenuItem name="assistant" v-if="auth === 'user'">
 							成为助理
 						</MenuItem>
-						<MenuItem name="providing">
+						<MenuItem name="providing" v-if="auth === 'lessor'">
 							出租设备
 						</MenuItem>
-						<MenuItem name="examine">
+						<MenuItem name="examine" v-if="auth === 'lessor'">
 							审核申请
 						</MenuItem>
-						<MenuItem name="renis">
+						<MenuItem name="renis" v-if="auth === 'lessor'">
 							出租历史
 						</MenuItem>
 					</Menu>
@@ -31,7 +31,12 @@
 				<Layout :style="{padding: '12px 24px 24px'}">
 					<Content :style="{padding: '24px', minHeight: '88vh', background: '#fff'}">
 						<rental-list v-if="status === 'list'"></rental-list>
+						<renting v-if="status === 'renting'"></renting>
 						<apply-history v-if="status === 'history'"></apply-history>
+						<review-app v-if="status === 'examine'"></review-app>
+						<rent-history v-if="status === 'renis'"></rent-history>
+						<apply-rent v-if="status === 'providing'"></apply-rent>
+						<apply-ass v-if="status === 'assistant'"></apply-ass>
 					</Content>
 				</Layout>
 			</Layout>
@@ -41,17 +46,34 @@
 
 <script>
 import Navigator from './Navigator.vue'
-import RentalList from './RentalList.vue'
-import ApplyHistory from './ApplyHistory.vue'
+import ReviewApp from './HomePage/ReviewApp'
+import RentalList from './HomePage/RentalList.vue'
+import ApplyHistory from './HomePage/ApplyHistory.vue'
+import Renting from './HomePage/Renting.vue'
+import RentHistory from './HomePage/RentHistory.vue'
+import ApplyRent from './HomePage/ApplyRent.vue'
+import ApplyAss from './HomePage/ApplyAss.vue'
 
 export default {
 	data() {
-		return { status: "list" } 
+		return { status: "list", auth: '' } 
+	},
+	mounted: function() {
+		this.$axios.get('/api/user/info', {
+			headers: { jwt: localStorage.getItem('jwt') }
+		}).then(response => {
+			this.auth = response.data.authority
+		})
 	},
 	components: {
 		Navigator,
 		RentalList,
-		ApplyHistory
+		ApplyHistory,
+		ReviewApp,
+		Renting,
+		RentHistory,
+		ApplyRent,
+		ApplyAss,
 	},
 	methods: {
 		changeActive(name) {
