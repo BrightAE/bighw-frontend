@@ -34,7 +34,7 @@
                                 </Select>
                             </div>
                             <br>
-                            <Table :columns="[  { title: '姓名', key: 'name'},
+                            <Table :columns="[  { title: '姓名', key: 'username'},
                                                 { title: '学号', key: 'student_id'},
                                                 { title: '邮箱', key: 'email'},
                                                 { title: '联系方式', key: 'contact' },
@@ -43,15 +43,15 @@
                                                 { title: '操作', slot: 'action'}
                                             ]" :data="users">
                                 <template slot-scope="{row}" slot="authority">
-                                    <div v-if='row.authority=="admin"'>管理员</div>
-                                    <div v-if='row.authority=="lessor"'>设备供应者</div>
-                                    <div v-if='row.authority=="user"'>普通用户</div>
+                                    <div v-if='row.authority=="admin"'><Button style='width:100px' type="success">管理员</Button></div>
+                                    <div v-if='row.authority=="lessor"'><Button style='width:100px' type="warning">设备提供者</Button></div>
+                                    <div v-if='row.authority=="user"'><Button style='width:100px;' type="info">普通用户</Button></div>
                                 </template>
                                 <template slot-scope="{row}" slot="action">
                                     <div v-if='row.authority!="admin"'>
-                                        <Button v-if='row.authority!="user"' type="primary" size="small" style="width:120px;margin:3px;" @click="set_authority(row.student_id,'user')">设为普通用户</Button>
-                                        <Button v-if='row.authority!="lessor"' type="primary" size="small" style="width:120px;margin:3px;" @click="set_authority(row.student_id,'lessor')">设为设备提供者</Button>
-                                        <Button type="error" size="small" style="width:120px;margin:3px;" @click="delete_user(row.student_id)">删除用户</Button>
+                                        <Button v-if='row.authority!="user"' type="primary" size="small" style="width:120px;margin:3px;" @click="set_authority(row.user_id,'user')">设为普通用户</Button>
+                                        <Button v-if='row.authority!="lessor"' type="primary" size="small" style="width:120px;margin:3px;" @click="set_authority(row.user_id,'lessor')">设为设备提供者</Button>
+                                        <Button type="error" size="small" style="width:120px;margin:3px;" @click="delete_user(row.user_id)">删除用户</Button>
                                     </div>
                                 </template>
                             </Table>
@@ -80,18 +80,18 @@
                                                 { title: '操作', slot: 'action' }
                                             ]" :data="equips">
                                 <template slot-scope="{row}" slot="status">
-                                    <div v-if='row.status=="onsale"'>可租</div>
-                                    <div v-if='row.status=="rented"'>已租</div>
-                                    <div v-if='row.status=="unavailable"'>下架</div>
+                                    <div v-if='row.status=="onsale"'><Button style='width:80px' type="success">可租</Button></div>
+                                    <div v-if='row.status=="rented"'><Button style='width:80px' type="waring">已租</Button></div>
+                                    <div v-if='row.status=="unavailable"'><Button style='width:80px' type="primary" disabled>下架</Button></div>
                                 </template>
                                 <template slot-scope="{row}" slot="action">
-                                    <Button type="primary" size="small" style="width:120px;margin:3px;" @click="()=>{equips_dialog=true;equip_modify.equip_id=row.equip_id;equip_modify.name=row.equip_name;equip_modify.address=row.address;equip_modify.end_time=row.end_time;equip_modify.status=row.status;}">修改设备信息</Button>
+                                    <Button type="primary" size="small" style="width:120px;margin:3px;" @click="()=>{equips_dialog=true;equip_modify.equip_id=row.equip_id;equip_modify.equip_name=row.equip_name;equip_modify.address=row.address;equip_modify.end_time=row.end_time;equip_modify.status=row.status;}">修改设备信息</Button>
                                     <Button type="error" size="small" style="width:120px;margin:3px;" @click="delete_equip(row.equip_id)">删除设备</Button>
                                     <Modal v-model="equips_dialog"
                                         title="设备信息修改"
                                         @on-ok="set_equip()"
                                         @on-cancel="equips_dialog=false">
-                                        设备名称:<Input v-model="equip_modify.name" clearable style="width: 300px;margin:8px;" size="large"/><br>
+                                        设备名称:<Input v-model="equip_modify.equip_name" clearable style="width: 300px;margin:8px;" size="large"/><br>
                                         设备地址:<Input v-model="equip_modify.address"  clearable style="width: 300px;margin:8px;" size="large"/><br>
                                         截止日期:<Input v-model="equip_modify.end_time" clearable style="width: 300px;margin:8px;" size="large"/><br>
                                         租借状态:
@@ -108,23 +108,24 @@
                         <div v-if='status=="rents"'>
                             <div style='display:flex;flex-direction:row;'>
                                 <Input v-model="rents_filter.equip_id" search placeholder="设备编号" style='width:300px' @on-search='rents_manage'/>
-                                <Input v-model="rents_filter.lessor_id" search placeholder="租借方id" style='width:300px' @on-search='rents_manage'/>
-                                <Input v-model="rents_filter.lessor_name" search placeholder="租借方名字" style='width:300px' @on-search='rents_manage'/>
+                                <Input v-model="rents_filter.equip_name" search placeholder="设备名" style='width:300px' @on-search='rents_manage'/>
+                                <Input v-model="rents_filter.lessor_id" search placeholder="供应方id" style='width:300px' @on-search='rents_manage'/>
+                                <Input v-model="rents_filter.lessor_name" search placeholder="供应方名字" style='width:300px' @on-search='rents_manage'/>
+                                <Input v-model="rents_filter.username" search placeholder="租借方名字" style='width:300px' @on-search='rents_manage'/>
                             </div>
                             <br>
                             <Table :columns="[  { title: '设备编号', key: 'equip_id'},
                                                 { title: '设备名称', key: 'equip_name'},
                                                 { title: '供应方', key: 'lessor_name'},
-                                                { title: '租方', key: 'user_name'},
+                                                { title: '租方', key: 'username'},
                                                 { title: '租借时间', key: 'rent_time' },
                                                 { title: '归还时间', key: 'return_time' },
                                                 { title: '截止日期', key: 'end_time' },
                                                 { title: '状态', slot: 'status' },
                                             ]" :data="rents">
                                 <template slot-scope="{row}" slot="status">
-                                    <div v-if='row.status=="onsale"'>可租</div>
-                                    <div v-if='row.status=="rented"'>已租</div>
-                                    <div v-if='row.status=="unavailable"'>下架</div>
+                                    <div v-if='row.status=="returned"'><Button style='width:80px' type="success">归还</Button></div>
+                                    <div v-if='row.status=="unreturned"'><Button style='width:80px' type="warning">未归还</Button></div>
                                 </template>
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
@@ -139,18 +140,20 @@
                                 <Input v-model="rent_requests_filter.equip_id" search placeholder="设备id" style='width:200px' @on-search='rent_requests_manage'/>
                             </div>
                             <br>
-                            <Table :columns="[  { title: '设备编号', key: 'equip_id'},
+                            <Table :columns="[  { title: '租借编号', key: 'rent_req_id'},
+                                                { title: '设备编号', key: 'equip_id'},
                                                 { title: '设备名', key: 'equip_name'},
                                                 { title: '提供者', key: 'lessor_name'},
-                                                { title: '租借者', key: 'user_name'},
-                                                { title: '租借日期', key: 'rent_time' },
+                                                { title: '租借者', key: 'username'},
+                                                { title: '租借日期', key: 'start_time' },
                                                 { title: '归还日期', key: 'return_time' },
-                                                { title: '截止日期', key: 'end_time' },
-                                                { title: '状态', slot: 'status' }
+                                                { title: '状态', slot: 'status' },
+                                                { title: '其他', key: 'detail' }
                                             ]" :data="rent_requests">
                                 <template slot-scope="{row}" slot="status">
-                                    <div v-if='row.status=="returned"'>未归还</div>
-                                    <div v-if='row.status=="unreturned"'>已归还</div>
+                                    <div v-if='row.status=="apply"'><Button style='width:80px' type="success">通过</Button></div>
+                                    <div v-if='row.status=="reject"'><Button style='width:80px' type="error">拒绝</Button></div>
+                                    <div v-if='row.status=="pending"'><Button style='width:80px' type="primary" disabled>等待审核</Button></div>
                                 </template>
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
@@ -171,9 +174,9 @@
                                                 { title: '操作', slot: 'action' }
                                             ]" :data="equip_requests">
                                 <template slot-scope="{row}" slot="status">
-                                    <div v-if='row.status=="apply"'>通过</div>
-                                    <div v-if='row.status=="reject"'>拒绝</div>
-                                    <div v-if='row.status=="pending"'>审核中</div>
+                                    <div v-if='row.status=="apply"'><Button style='width:80px' type="success">通过</Button></div>
+                                    <div v-if='row.status=="reject"'><Button style='width:80px' type="error">拒绝</Button></div>
+                                    <div v-if='row.status=="pending"'><Button style='width:80px' type="primary" disabled>等待审核</Button></div>
                                 </template>
                                 <template slot-scope="{row}" slot="action">
                                     <Button v-if='row.status==="pending"' type="success" size="small" style="width:120px;margin:3px;" @click="equip_requests_decide(row.sale_req_id,'apply')">通过</Button>
@@ -204,10 +207,10 @@ export default {
             users_filter: 'none',
             equips_filter: {status:'all',lessor_name:'',lessor_id:'',name_search:''},
             equips_dialog: false,
-            equip_modify: {equip_id:'',name:'',address:'',end_time:'',status:''},
+            equip_modify: {equip_id:'',equip_name:'',address:'',end_time:'',status:''},
             equips: [],
             rents: [],
-            rents_filter:{user_id:'',lessor_id:'',equip_id:''},
+            rents_filter:{lessor_id:'',lessor_name:'',equip_id:'',equip_name:'',username:''},
             rent_requests: [],
             rent_requests_filter: {lessor_name:'',lessor_id:'',renter_name:'',renter_id:'',equip_name:'',equip_id:''},
             equip_requests: [],
@@ -263,47 +266,36 @@ export default {
             let par={
                 page:_this.page,
                 page_size:_this.size,
-                status:_this.users_filter
+                filter:_this.users_filter
             };
             _this.$axios(
                 {
                     method: 'get',
                     url: '/api/user/query-all',
-                    params: par
+                    params: par,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
+                    }
                 }
             ).then(Response => {
                 _this.total=Response.data.total;
                 _this.users=Response.data.users;
             }).catch(() => {
             });
-            /*_this.users=[
-                {
-                    name:'fuck',
-                    student_id:'shit',
-                    email:'damn',
-                    contact:'bitch',
-                    authority:'lessor',
-                    lab_info:'gun'
-                },
-                {
-                    name:'fuck',
-                    student_id:'shit',
-                    email:'damn',
-                    contact:'bitch',
-                    authority:'user',
-                    lab_info:'gun'
-                }
-            ]*/
         },
         set_authority(id,type) {
             let _this=this;
+            let req_body=_this.$qs.stringify({
+                user_id: id,
+                authority: type
+            });
             _this.$axios(
                 {
                     method: 'post',
                     url: '/api/user/set-authority',
-                    data: {
-                        user_id: id,
-                        authority: type
+                    data: req_body,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
                     }
                 }
             ).then(Response => {
@@ -314,24 +306,29 @@ export default {
                         closable: true
                     });
                 }
-                if (Response.data.message=='error') {
+                if (Response.data.error==='') {
                     _this.$Message.info({
                         content: '设备关联，设置失败！',
                         duration: 10,
                         closable: true
                     });
                 }
+                _this.users_manage();
             }).catch(() => {
             });
         },
         delete_user(id) {
             let _this=this;
+            let req_body=_this.$qs.stringify({
+                user_id: id
+            });
             _this.$axios(
                 {
                     method: 'post',
                     url: '/api/user/delete',
-                    data: {
-                        user_id: id,
+                    data: req_body,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
                     }
                 }
             ).then(Response => {
@@ -349,6 +346,7 @@ export default {
                         closable: true
                     });
                 }
+                _this.users_manage();
             }).catch(() => {
             });
         },
@@ -366,41 +364,28 @@ export default {
                 {
                     method: 'get',
                     url: '/api/equip/query',
-                    params: par
+                    params: par,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
+                    }
                 }
             ).then(Response => {
                 _this.total=Response.data.total;
                 _this.equips=Response.data.equip;
             }).catch(() => {
             });
-            /*_this.equips=[
-                {
-                    equip_id:'cao',
-                    equip_name:'fuck',
-                    lessor_name:'shit',
-                    address:'damn',
-                    contact:'bitch',
-                    end_time:'dick',
-                    status:'onsale'
-                },
-                {
-                    equip_id:'cao',
-                    equip_name:'fuck',
-                    lessor_name:'shit',
-                    address:'damn',
-                    contact:'bitch',
-                    end_time:'dick',
-                    status:'rented'
-                }
-            ]*/
         },
         set_equip() {
             let _this=this;
+            let req_body=_this.$qs.stringify(_this.equip_modify);
             _this.$axios(
                 {
                     method: 'post',
-                    url: '/api/user/set',
-                    data: _this.equip_modify
+                    url: '/api/equip/set',
+                    data: req_body,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
+                    }
                 }
             ).then(Response => {
                 if (Response.data.message=='ok') {
@@ -410,24 +395,29 @@ export default {
                         closable: true
                     });
                 }
-                if (Response.data.message=='error') {
+                if (Response.data.error!=undefined) {
                     _this.$Message.info({
                         content: '设备关联，设置失败！',
                         duration: 10,
                         closable: true
                     });
                 }
+                _this.equips_manage();
             }).catch(() => {
             });
         },
         delete_equip(id) {
             let _this=this;
+            let req_body=_this.$qs.stringify({
+                equip_id: id
+            });
             _this.$axios(
                 {
                     method: 'post',
                     url: '/api/equip/delete',
-                    data: {
-                        equip_id: id,
+                    data: req_body,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
                     }
                 }
             ).then(Response => {
@@ -438,13 +428,14 @@ export default {
                         closable: true
                     });
                 }
-                if (Response.data.message=='error') {
+                if (Response.data.error!=undefined) {
                     _this.$Message.info({
-                        content: '正在出租，删除失败！',
+                        content: '删除失败！',
                         duration: 10,
                         closable: true
                     });
                 }
+                _this.equips_manage();
             }).catch(() => {
             });
         },
@@ -454,42 +445,25 @@ export default {
                 page:_this.page,
                 page_size:_this.size,
             };
-            if (_this.rents_filter.user_id!='') par.user_id=_this.rents_filter.user_id;
             if (_this.rents_filter.lessor_id!='') par.lessor_id=_this.rents_filter.lessor_id;
+            if (_this.rents_filter.lessor_name!='') par.lessor_name=_this.rents_filter.lessor_name;
             if (_this.rents_filter.equip_id!='') par.equip_id=_this.rents_filter.equip_id;
+            if (_this.rents_filter.equip_name!='') par.equip_name=_this.rents_filter.equip_name;
+            if (_this.rents_filter.username!='') par.username=_this.rents_filter.username;
             _this.$axios(
                 {
                     method: 'get',
-                    url: '/api/rent',
-                    params: par
+                    url: '/api/rent/query',
+                    params: par,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
+                    }
                 }
             ).then(Response => {
                 _this.total=Response.data.total;
-                _this.rent=Response.data.rent_info;
+                _this.rents=Response.data.rent_info;
             }).catch(() => {
             });
-            /*_this.rents=[
-                {
-                    equip_id:'fuck',
-                    equip_name:'shit',
-                    lessor_name:'damn',
-                    user_name:'bitch',
-                    rent_time:'cao',
-                    return_time:'gun',
-                    end_time:'gan',
-                    status:'onsale'
-                },
-                {
-                    equip_id:'fuck',
-                    equip_name:'shit',
-                    lessor_name:'damn',
-                    user_name:'bitch',
-                    rent_time:'cao',
-                    return_time:'gun',
-                    end_time:'gan',
-                    status:'rented'
-                }
-            ]*/
         },
         rent_requests_manage() {
             let _this=this;
@@ -507,33 +481,16 @@ export default {
                 {
                     method: 'get',
                     url: '/api/rent/request/query',
-                    params: par
+                    params: par,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
+                    }
                 }
             ).then(Response => {
                 _this.total=Response.data.total;
-                _this.rent_requests=Response.data.rent_requests;
+                _this.rent_requests=Response.data.rent_req;
             }).catch(() => {
             });
-            /*_this.rent_requests=[
-                {
-                    equip_id:'cao',
-                    equip_name:'fuck',
-                    lessor_name:'shit',
-                    address:'damn',
-                    contact:'bitch',
-                    end_time:'dick',
-                    status:'onsale'
-                },
-                {
-                    equip_id:'cao',
-                    equip_name:'fuck',
-                    lessor_name:'shit',
-                    address:'damn',
-                    contact:'bitch',
-                    end_time:'dick',
-                    status:'rented'
-                }
-            ]*/
         },
         equip_requests_manage() {
             let _this=this;
@@ -547,44 +504,31 @@ export default {
             _this.$axios(
                 {
                     method: 'get',
-                    url: '/api/rent/request/query',
-                    params: par
+                    url: '/api/equip/request/query',
+                    params: par,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
+                    }
                 }
             ).then(Response => {
                 _this.total=Response.data.total;
                 _this.equip_requests=Response.data.equip_req;
             }).catch(() => {
             });
-            /*_this.equip_requests=[
-                {
-                    equip_id:'cao',
-                    equip_name:'fuck',
-                    lessor_name:'shit',
-                    address:'damn',
-                    contact:'bitch',
-                    end_time:'dick',
-                    status:'onsale'
-                },
-                {
-                    equip_id:'cao',
-                    equip_name:'fuck',
-                    lessor_name:'shit',
-                    address:'damn',
-                    contact:'bitch',
-                    end_time:'dick',
-                    status:'pending'
-                }
-            ]*/
         },
-        equip_request_decide(id,dec) {
+        equip_requests_decide(id,dec) {
             let _this=this;
+            let req_body=_this.$qs.stringify({
+                sale_req_id: id,
+                decision: dec
+            });
             _this.$axios(
                 {
                     method: 'post',
                     url: '/api/equip/request/decide',
-                    data: {
-                        sale_req_id: id,
-                        decision: dec
+                    data: req_body,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
                     }
                 }
             ).then(Response => {
@@ -595,6 +539,7 @@ export default {
                         closable: true
                     });
                 }
+                _this.equip_requests_manage();
             }).catch(() => {
             });
         }
@@ -607,7 +552,7 @@ export default {
 </script>
 
 <style scoped>
-#mian {
+#main {
     border: 1px solid #d7dde4;
     background: #f5f7f9;
     position: relative;
