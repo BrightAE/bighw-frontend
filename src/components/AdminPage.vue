@@ -217,6 +217,28 @@ export default {
             equip_requests_filter: {lessor_name:'',equip_name:''}
         }
     },
+    mounted: function () {
+        let _this=this;
+        _this.$axios(
+            {
+                method: 'get',
+                url: '/api/user/info',
+                headers: {
+                    jwt: localStorage.getItem('jwt')
+                }
+            }
+        ).then(Response => {
+            if (Response.data.authority!='admin'){
+                _this.$Message.info({
+                    content: '没有权限！',
+                    duration: 10,
+                    closable: true
+                });
+                this.$router.replace('/home')
+            }
+        }).catch(() => {
+        });
+    },
     methods: {
         ChangeActive(name) {
             let _this=this;
