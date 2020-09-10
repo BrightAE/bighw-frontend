@@ -21,6 +21,9 @@
                                 <MenuItem name="equip_requests">
                                     设备上架管理
                                 </MenuItem>
+                                <MenuItem name="auth_requests">
+                                    权限申请管理
+                                </MenuItem>
                             </Menu>
                     </div>
 				</Sider>
@@ -185,6 +188,36 @@
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
                         </div>
+                        <div v-if='status=="auth_requests"'>
+                            <div style='display:flex;flex-direction:row;'>
+                                <Select v-model="auth_requests_filter.status" style="width:150px" @on-change='auth_requests_manage'>
+                                    <Option value="all">全部</Option>
+                                    <Option value="pending">未审核</Option>
+                                </Select>
+                                <Input v-model="auth_requests_filter.user_id" search placeholder="用户id" style='width:300px' @on-search='auth_requests_manage'/>
+                            </div>
+                            <br>
+                            <Table :columns="[  { title: '用户id', key: 'user_id'},
+                                                { title: '用户名', key: 'username'},
+                                                { title: '实验室信息', key: 'lab_info'},
+                                                { title: '邮箱', key: 'email'},
+                                                { title: '联系方式', key: 'contact'},
+                                                { title: '详情', key: 'detail'},
+                                                { title: '状态', slot: 'status'},
+                                                { title: '操作', slot: 'action' }
+                                            ]" :data="auth_requests">
+                                <template slot-scope="{row}" slot="status">
+                                    <div v-if='row.status=="apply"'><Button style='width:80px' type="success">通过</Button></div>
+                                    <div v-if='row.status=="reject"'><Button style='width:80px' type="error">拒绝</Button></div>
+                                    <div v-if='row.status=="pending"'><Button style='width:80px' type="primary" disabled>等待审核</Button></div>
+                                </template>
+                                <template slot-scope="{row}" slot="action">
+                                    <Button v-if='row.status==="pending"' type="success" size="small" style="width:120px;margin:3px;" @click="auth_requests_decide(row.auth_req_id,'apply')">通过</Button>
+                                    <Button v-if='row.status==="pending"' type="error" size="small" style="width:120px;margin:3px;" @click="auth_requests_decide(row.auth_req_id,'reject')">拒绝</Button>
+                                </template>
+                            </Table>
+                            <Page :total="total" size="small" show-total @on-change='pagechange'/>
+                        </div>
 					</Content>
 				</Layout>
 			</Layout>
@@ -214,7 +247,9 @@ export default {
             rent_requests: [],
             rent_requests_filter: {lessor_name:'',lessor_id:'',renter_name:'',renter_id:'',equip_name:'',equip_id:''},
             equip_requests: [],
-            equip_requests_filter: {lessor_name:'',equip_name:''}
+            equip_requests_filter: {lessor_name:'',equip_name:''},
+            auth_requests: [],
+            auth_requests_filter: {user_id:'',status:'all'}
         }
     },
     mounted: function () {
@@ -260,6 +295,9 @@ export default {
                 case 'equip_requests':
                     _this.equip_requests_manage();
                     break;
+                case 'auth_requests':
+                    _this.auth_requests_manage();
+                    break;
             }
         },
         pagechange(new_page){
@@ -280,6 +318,9 @@ export default {
                     break;
                 case 'equip_requests':
                     _this.equip_requests_manage();
+                    break;
+                case 'auth_requests':
+                    _this.auth_requests_manage();
                     break;
             }
         },
@@ -561,7 +602,72 @@ export default {
                         closable: true
                     });
                 }
+                else {
+                    _this.$Message.info({
+                        content: '审核失败！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
                 _this.equip_requests_manage();
+            }).catch(() => {
+            });
+        },
+        auth_requests_manage() {
+            let _this=this;
+            let par={
+                page:_this.page,
+                page_size:_this.size,
+                status:_this.auth_requests_filter.status
+            };
+            if (_this.auth_requests_filter.user_id!='') par.user_id=_this.auth_requests_filter.user_id;
+            _this.$axios(
+                {
+                    method: 'get',
+                    url: '/api/user/auth/query',
+                    params: par,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
+                    }
+                }
+            ).then(Response => {
+                _this.total=Response.data.total;
+                _this.auth_requests=Response.data.auth_req;
+                console.log(Response.data.auth_req);
+            }).catch(() => {
+            });
+        },
+        auth_requests_decide(id,dec) {
+            let _this=this;
+            let req_body=_this.$qs.stringify({
+                auth_req_id: id,
+                decision: dec
+            });
+            _this.$axios(
+                {
+                    method: 'post',
+                    url: '/api/user/auth/decide',
+                    data: req_body,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
+                    }
+                }
+            ).then(Response => {
+                if (Response.data.message==='ok') {
+                    _this.$Message.info({
+                        content: '审核成功！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
+                else {
+                    _this.$Message.info({
+                        content: '审核失败！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
+                _this.auth_requests_manage();
             }).catch(() => {
             });
         }
