@@ -11,7 +11,7 @@
                 <Icon type="md-person"></Icon>
                 管理员
             </Button>
-            <Button name="btn3">
+            <Button name="btn3" @click=logout>
                 <Icon type="md-log-out"></Icon>
                 登出
             </Button>
@@ -24,7 +24,25 @@ export default {
 	name: 'navigator',
 	data() {
 		return {}
-	}
+    },
+    methods: {
+        logout: function() {
+            let jwt = localStorage.getItem('jwt')
+            let reqBody = this.$qs.stringify({})
+            this.$axios.post('/api/logout', reqBody, {
+                headers: { jwt: jwt }
+            }).then(response => {
+                if(response.data.message === 'ok') {
+                    this.$Message.success('登出成功！')
+                    this.$asyncLocalStorage.clear()
+                    this.$router.push('/login')
+                } else {
+                    console.log(response.data.error)
+                    this.$Message.error('登出失败')
+                }
+            })
+        } 
+    }
 }
 </script>
 

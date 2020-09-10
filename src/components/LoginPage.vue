@@ -31,11 +31,15 @@ export default {
 		submit() {
 			let reqBody = this.$qs.stringify({
 				'username': this.username,
-				'password': this.password
+				'password': this.$md5(this.password)
 			})
 			this.$axios.post('/api/login', reqBody).then(response => {
 				if(response.data.message === 'ok') {
 					this.$Message.success('登录成功！')
+					this.$asyncLocalStorage.setItem('jwt', response.data.jwt);
+					this.$router.push('/home')
+				} else {
+					this.$Message.error('登陆失败')
 				}
 				
 			})

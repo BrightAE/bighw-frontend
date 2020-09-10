@@ -62,7 +62,7 @@ export default {
 			}
 			let reqBody = this.$qs.stringify({
 				'username': this.username,
-				'password': this.password,
+				'password': this.$md5(this.password),
 				'student_id': this.student_id,
 				'email': this.email,
 				'contact': this.contact

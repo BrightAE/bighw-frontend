@@ -6,12 +6,14 @@ import App from './App.vue'
 import axios from './api.js'
 import router from './router.js'
 import qs from 'qs'
+import md5 from 'js-md5'
 
 Vue.config.productionTip = false
 document.title = '清青快租'
 
 Vue.prototype.$axios = axios
 Vue.prototype.$qs = qs
+Vue.prototype.$md5 = md5
 Vue.use(ViewUI)
 
 new Vue({
