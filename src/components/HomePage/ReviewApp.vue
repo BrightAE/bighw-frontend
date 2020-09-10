@@ -13,8 +13,8 @@
 					<Button v-else disabled size="small" style="margin-right: 5px">等待</Button>
 				</template>
 				<template slot-scope="{ row }" slot="action">
-					<Button type="success" size="small" style="margin-right: 5px" @click="action(row, 'apply')">同意</Button>
-					<Button type="error" size="small" style="margin-right: 5px" @click="action(row, 'reject')">拒绝</Button>
+					<Button v-if="row.status === 'pending'" type="success" size="small" style="margin-right: 5px" @click="action(row, 'apply')">同意</Button>
+					<Button v-if="row.status === 'pending'" type="error" size="small" style="margin-right: 5px" @click="action(row, 'reject')">拒绝</Button>
 				</template>
 			</Table>
 		</div>
@@ -34,16 +34,21 @@ export default {
 			{ title: '截至日期', key: 'return_time' },
 			{ title: '申请状态', slot: 'status' },
 			{ title: '操作', slot: 'action'}
-		], rent_his: [], visiable: false, apply: {}, page: 1, page_size: 999999, total: 0 }
+		], rent_his: [], visiable: false, apply: {}, page: 1, page_size: 999999, total: 0, username: '' }
 	},
 	mounted() {
-		this.loadHistory()
+		this.$axios.get('api/user/info', {
+			headers: { jwt: localStorage.getItem('jwt') }
+		}).then(response => {
+			this.username = response.data.username
+			this.loadHistory()
+		})
 	},
 	methods: {
 		loadHistory: function() {
 			this.$axios.get('/api/rent/request/query', {
 				headers: { jwt: localStorage.getItem('jwt') },
-				params: { page: this.page, page_size: this.page_size }
+				params: { page: this.page, page_size: this.page_size, lessor_name: this.username }
 			}).then(response => {
 				this.total = response.data.total;
 				this.rent_his = response.data.rent_req

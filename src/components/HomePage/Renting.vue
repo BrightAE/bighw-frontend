@@ -29,16 +29,21 @@ export default {
 			{ title: '租借日期', key: 'start_time' },
 			{ title: '截至日期', key: 'return_time' },
 			{ title: '申请状态', slot: 'status' },
-		], rent_his: [], visiable: false, apply: {}, page: 1, page_size: 999999, total: 0 }
+		], rent_his: [], visiable: false, apply: {}, page: 1, page_size: 999999, total: 0, username: '' }
 	},
 	mounted() {
-		this.loadHistory()
+		this.$axios.get('api/user/info', {
+			headers: { jwt: localStorage.getItem('jwt') }
+		}).then(response => {
+			this.username = response.data.username
+			this.loadHistory()
+		})
 	},
 	methods: {
 		loadHistory: function() {
 			this.$axios.get('/api/rent/request/query', {
 				headers: { jwt: localStorage.getItem('jwt') },
-				params: { page: this.page, page_size: this.page_size }
+				params: { page: this.page, page_size: this.page_size, username: this.username }
 			}).then(response => {
 				this.total = response.data.total;
 				this.rent_his = response.data.rent_req
