@@ -155,21 +155,29 @@
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
                         </div>
-                        <div v-if='status=="equip_request"'>
+                        <div v-if='status=="equip_requests"'>
                             <div style='display:flex;flex-direction:row;'>
-                                <Input v-model="equip_request_filter.lessor_name" search placeholder="租借方名字" style='width:300px' @on-search='equip_request_manage'/>
-                                <Input v-model="equip_request_filter.lessor_id" search placeholder="租借方id" style='width:300px' @on-search='equip_request_manage'/>
-                                <Input v-model="equip_request_filter.equip_name" search placeholder="设备名" style='width:300px' @on-search='equip_request_manage'/>
+                                <Input v-model="equip_requests_filter.lessor_name" search placeholder="租借方名字" style='width:300px' @on-search='equip_requests_manage'/>
+                                <Input v-model="equip_requests_filter.equip_name" search placeholder="设备名" style='width:300px' @on-search='equip_requests_manage'/>
                             </div>
                             <br>
-                            <Table :columns="[  { title: '设备编号', key: 'equip_id'},
+                            <Table :columns="[  { title: '申请编号', key: 'sale_req_id'},
+                                                { title: '设备编号', key: 'equip_id'},
                                                 { title: '设备名', key: 'equip_name'},
                                                 { title: '截止日期', key: 'end_time'},
+                                                { title: '实验室信息', key: 'lab_info'},
+                                                { title: '供应者', key: 'lessor_name'},
+                                                { title: '状态', slot: 'status'},
                                                 { title: '操作', slot: 'action' }
                                             ]" :data="equip_requests">
+                                <template slot-scope="{row}" slot="status">
+                                    <div v-if='row.status=="apply"'>通过</div>
+                                    <div v-if='row.status=="reject"'>拒绝</div>
+                                    <div v-if='row.status=="pending"'>审核中</div>
+                                </template>
                                 <template slot-scope="{row}" slot="action">
-                                    <Button type="primary" size="small" style="width:120px;margin:3px;" @click="()=>{equips_dialog=true;equip_modify.equip_id=row.equip_id;equip_modify.name=row.equip_name;equip_modify.address=row.address;equip_modify.end_time=row.end_time;equip_modify.status=row.status;}">修改设备信息</Button>
-                                    <Button type="error" size="small" style="width:120px;margin:3px;" @click="delete_equip(row.equip_id)">删除设备</Button>
+                                    <Button v-if='row.status==="pending"' type="success" size="small" style="width:120px;margin:3px;" @click="equip_requests_decide(row.sale_req_id,'apply')">通过</Button>
+                                    <Button v-if='row.status==="pending"' type="error" size="small" style="width:120px;margin:3px;" @click="equip_requests_decide(row.sale_req_id,'reject')">拒绝</Button>
                                 </template>
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
@@ -203,7 +211,7 @@ export default {
             rent_requests: [],
             rent_requests_filter: {lessor_name:'',lessor_id:'',renter_name:'',renter_id:'',equip_name:'',equip_id:''},
             equip_requests: [],
-            equip_requests_filter: {lessor_name:'',lessor_id:'',equip_name:''}
+            equip_requests_filter: {lessor_name:'',equip_name:''}
         }
     },
     methods: {
@@ -250,9 +258,9 @@ export default {
                     break;
             }
         },
-        users_manage() {
+        users_manage() {    
             let _this=this;
-            /*let par={
+            let par={
                 page:_this.page,
                 page_size:_this.size,
                 status:_this.users_filter
@@ -267,8 +275,8 @@ export default {
                 _this.total=Response.data.total;
                 _this.users=Response.data.users;
             }).catch(() => {
-            });*/
-            _this.users=[
+            });
+            /*_this.users=[
                 {
                     name:'fuck',
                     student_id:'shit',
@@ -285,7 +293,7 @@ export default {
                     authority:'user',
                     lab_info:'gun'
                 }
-            ]
+            ]*/
         },
         set_authority(id,type) {
             let _this=this;
@@ -346,7 +354,7 @@ export default {
         },
         equips_manage() {
             let _this=this;
-            /*let par={
+            let par={
                 page:_this.page,
                 page_size:_this.size,
             };
@@ -364,8 +372,8 @@ export default {
                 _this.total=Response.data.total;
                 _this.equips=Response.data.equip;
             }).catch(() => {
-            });*/
-            _this.equips=[
+            });
+            /*_this.equips=[
                 {
                     equip_id:'cao',
                     equip_name:'fuck',
@@ -384,7 +392,7 @@ export default {
                     end_time:'dick',
                     status:'rented'
                 }
-            ]
+            ]*/
         },
         set_equip() {
             let _this=this;
@@ -442,7 +450,7 @@ export default {
         },
         rents_manage() {
             let _this=this;
-            /*let par={
+            let par={
                 page:_this.page,
                 page_size:_this.size,
             };
@@ -459,8 +467,8 @@ export default {
                 _this.total=Response.data.total;
                 _this.rent=Response.data.rent_info;
             }).catch(() => {
-            });*/
-            _this.rents=[
+            });
+            /*_this.rents=[
                 {
                     equip_id:'fuck',
                     equip_name:'shit',
@@ -481,11 +489,11 @@ export default {
                     end_time:'gan',
                     status:'rented'
                 }
-            ]
+            ]*/
         },
         rent_requests_manage() {
             let _this=this;
-            /*let par={
+            let par={
                 page:_this.page,
                 page_size:_this.size,
             };
@@ -505,8 +513,8 @@ export default {
                 _this.total=Response.data.total;
                 _this.rent_requests=Response.data.rent_requests;
             }).catch(() => {
-            });*/
-            _this.rent_requests=[
+            });
+            /*_this.rent_requests=[
                 {
                     equip_id:'cao',
                     equip_name:'fuck',
@@ -525,20 +533,17 @@ export default {
                     end_time:'dick',
                     status:'rented'
                 }
-            ]
+            ]*/
         },
         equip_requests_manage() {
             let _this=this;
-            /*let par={
+            let par={
                 page:_this.page,
                 page_size:_this.size,
             };
-            if (_this.rent_requests_filter.lessor_name!='') par.lessor_name=_this.rent_requests_filter.lessor_name;
-            if (_this.rent_requests_filter.lessor_id!='') par.lessor_id=_this.rent_requests_filter.lessor_id;
-            if (_this.rent_requests_filter.renter_name!='') par.renter_name=_this.rent_requests_filter.renter_name;
-            if (_this.rent_requests_filter.renter_id!='') par.renter_id=_this.rent_requests_filter.renter_id;
-            if (_this.rent_requests_filter.equip_name!='') par.equip_name=_this.rent_requests_filter.equip_name;
-            if (_this.rent_requests_filter.equip_id!='') par.equip_id=_this.rent_requests_filter.equip_id;
+            if (_this.equip_requests_filter.lessor_name!='') par.lessor_name=_this.equip_requests_filter.lessor_name;
+            if (_this.equip_requests_filter.equip_name!='') par.equip_name=_this.equip_requests_filter.equip_name;
+            if (_this.equip_requests_filter.equip_id!='') par.equip_id=_this.equip_requests_filter.equip_id;
             _this.$axios(
                 {
                     method: 'get',
@@ -547,10 +552,10 @@ export default {
                 }
             ).then(Response => {
                 _this.total=Response.data.total;
-                _this.rent_requests=Response.data.rent_requests;
+                _this.equip_requests=Response.data.equip_req;
             }).catch(() => {
-            });*/
-            _this.equip_requests_requests=[
+            });
+            /*_this.equip_requests=[
                 {
                     equip_id:'cao',
                     equip_name:'fuck',
@@ -567,9 +572,31 @@ export default {
                     address:'damn',
                     contact:'bitch',
                     end_time:'dick',
-                    status:'rented'
+                    status:'pending'
                 }
-            ]
+            ]*/
+        },
+        equip_request_decide(id,dec) {
+            let _this=this;
+            _this.$axios(
+                {
+                    method: 'post',
+                    url: '/api/equip/request/decide',
+                    data: {
+                        sale_req_id: id,
+                        decision: dec
+                    }
+                }
+            ).then(Response => {
+                if (Response.data.message==='ok') {
+                    _this.$Message.info({
+                        content: '审核成功！',
+                        duration: 10,
+                        closable: true
+                    });
+                }
+            }).catch(() => {
+            });
         }
     },
 	components: {
