@@ -8,11 +8,23 @@
 						<MenuItem name="list" >
 							上架列表
 						</MenuItem>
+						<MenuItem name="renting">
+							正在租借
+						</MenuItem>
 						<MenuItem name="history">
 							申请历史
 						</MenuItem>
-						<MenuItem name="renting">
-							正在租借
+						<MenuItem name="assistant">
+							成为助理
+						</MenuItem>
+						<MenuItem name="providing">
+							出租设备
+						</MenuItem>
+						<MenuItem name="examine">
+							审核申请
+						</MenuItem>
+						<MenuItem name="renis">
+							出租历史
 						</MenuItem>
 					</Menu>
 				</Sider>
@@ -34,7 +46,7 @@ import ApplyHistory from './ApplyHistory.vue'
 
 export default {
 	data() {
-		return { status: "history" } 
+		return { status: "list" } 
 	},
 	components: {
 		Navigator,

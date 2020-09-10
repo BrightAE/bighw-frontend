@@ -29,8 +29,16 @@ export default {
 	},
 	methods: {
 		submit() {
-			console.log(this.username)
-			console.log(this.password)
+			let reqBody = this.$qs.stringify({
+				'username': this.username,
+				'password': this.password
+			})
+			this.$axios.post('/api/login', reqBody).then(response => {
+				if(response.data.message === 'ok') {
+					this.$Message.success('登录成功！')
+				}
+				
+			})
 		},
 		logon() {
 			this.$router.push('/logon')
