@@ -53,7 +53,6 @@ export default {
             }).then(response => {
                 if(response.data.message === 'ok') {
                     this.$Message.success('登出成功！')
-                    this.$asyncLocalStorage.clear()
                     this.$router.push('/login')
                 } else {
                     console.log(response.data.error)
