@@ -11,6 +11,9 @@
 					<Button v-if="row.status === 'returned'" type="success" size="small" style="margin-right: 5px" >已归还</Button>
 					<Button v-else-if="row.status === 'unreturned'" type="error" size="small" style="margin-right: 5px" >未归还</Button>
 				</template>
+				<template slot-scope="{ row }" slot="action">
+					<Button v-if="row.status === 'unreturned'" type="success" size="small" style="margin-right: 5px" @click="goReturn(row)">确认归还</Button>
+				</template>
 			</Table>
 		</div>
 		<div id="page"><Page :total="total" size="small" show-total /></div>
@@ -28,6 +31,7 @@ export default {
 			{ title: '租借日期', key: 'start_time' },
 			{ title: '归还日期', key: 'return_time' },
 			{ title: '状态', slot: 'status' },
+			{ title: '操作', slot: 'action' },
 		], rent_his: [], visiable: false, apply: {}, page: 1, page_size: 999999, total: 0, username: '' }
 	},
 	mounted() {
@@ -45,7 +49,20 @@ export default {
 				params: { page: this.page, page_size: this.page_size, lessor_name: this.username }
 			}).then(response => {
 				this.total = response.data.total;
-				this.rent_his = response.data.rent_req
+				this.rent_his = response.data.rent_info
+			})
+		},
+		goReturn: function(row) {
+			let reqBody = this.$qs.stringify({
+				rent_info_id: row.rent_id,
+			})
+			this.$axios.post('/api/rent/confirm', reqBody, {
+				headers: { jwt: localStorage.getItem('jwt') }
+			}).then(response => {
+				if(response.data.message === 'ok') {
+					this.$Message.success('确认归还')
+					this.loadHistory();
+				}
 			})
 		}
 	}

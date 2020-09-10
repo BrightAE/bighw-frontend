@@ -18,7 +18,7 @@
 							成为助理
 						</MenuItem>
 						<MenuItem name="providing" v-if="auth === 'lessor'">
-							出租设备
+							我的设备
 						</MenuItem>
 						<MenuItem name="examine" v-if="auth === 'lessor'">
 							审核申请

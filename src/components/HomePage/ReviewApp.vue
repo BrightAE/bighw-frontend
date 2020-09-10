@@ -64,6 +64,7 @@ export default {
 			}).then(response => {
 				if(response.data.message === 'ok') {
 					this.$Message.success('操作成功')
+					this.loadHistory()
 				}
 			})
 		}

@@ -6,11 +6,10 @@
 			</div>
 		</div>
 		<div id="tabel">
-			<Table :columns="tablehead" :data="rent_his">
+			<Table :columns="tablehead" :data="renting">
 				<template slot-scope="{ row }" slot="status">
-					<Button v-if="row.status === 'apply'" type="success" size="small" style="margin-right: 5px" >同意</Button>
-					<Button v-else-if="row.status === 'reject'" type="error" size="small" style="margin-right: 5px" >拒绝</Button>
-					<Button v-else disabled size="small" style="margin-right: 5px">等待</Button>
+					<Button v-if="row.status === 'rented'" type="error" size="small" style="margin-right: 5px" >未归还</Button>
+					<Button v-else type="success" size="small" style="margin-right: 5px" >已归还</Button>
 				</template>
 			</Table>
 		</div>
@@ -28,25 +27,25 @@ export default {
 			{ title: '使用者', key: 'username' },
 			{ title: '租借日期', key: 'start_time' },
 			{ title: '截至日期', key: 'return_time' },
-			{ title: '申请状态', slot: 'status' },
-		], rent_his: [], visiable: false, apply: {}, page: 1, page_size: 999999, total: 0, username: '' }
+			{ title: '使用状态', slot: 'status' },
+		], renting: [], visiable: false, apply: {}, page: 1, page_size: 999999, total: 0, username: '' }
 	},
 	mounted() {
 		this.$axios.get('api/user/info', {
 			headers: { jwt: localStorage.getItem('jwt') }
 		}).then(response => {
 			this.username = response.data.username
-			this.loadHistory()
+			this.loadRented()
 		})
 	},
 	methods: {
-		loadHistory: function() {
-			this.$axios.get('/api/rent/request/query', {
+		loadRented: function() {
+			this.$axios.get('/api/equip/query', {
 				headers: { jwt: localStorage.getItem('jwt') },
 				params: { page: this.page, page_size: this.page_size, username: this.username }
 			}).then(response => {
 				this.total = response.data.total;
-				this.rent_his = response.data.rent_req
+				this.renting = response.data.equip
 			})
 		}
 	}

@@ -13,13 +13,14 @@
 		<div id="tabel">
 			<Table :columns="tablehead" :data="rent_equip">
 				<template slot-scope="{ row }" slot="status">
-					<Button v-if="row.status === 'apply'" type="success" size="small" style="margin-right: 5px" >可租</Button>
-					<Button v-else-if="row.status === 'reject'" type="error" size="small" style="margin-right: 5px" >已租</Button>
+					<Button v-if="row.status === 'onsale'" type="success" size="small" style="margin-right: 5px" >可租</Button>
+					<Button v-else-if="row.status === 'rented'" type="error" size="small" style="margin-right: 5px" >已租</Button>
 					<Button v-else disabled size="small" style="margin-right: 5px">下架</Button>
 				</template>
 				<template slot-scope="{ row }" slot="action">
-					<Button v-if="row.status === 'unavailable'" type="primary" size="small" style="margin-right: 5px" @click="goApply(row, 'onsale')">上架</Button>
-					<Button v-else-if="row.status === 'onsale'" type="primary" size="small" style="margin-right: 5px" @click="goApply(row, 'unavailable')">下架</Button>
+					<Button v-if="row.status === 'unavailable'" type="primary" size="small" style="margin-right: 5px" @click="takeoff(row)">上架</Button>
+					<Button v-else-if="row.status === 'onsale'" type="primary" size="small" style="margin-right: 5px" @click="land(row)">下架</Button>
+					<Button v-if="row.status != 'rented'" type="error" size="small" style="margin-right: 5px" @click="goDelete(row)">删除</Button>
 				</template>
 			</Table>
 		</div>
@@ -68,33 +69,66 @@ export default {
 			}).then(response => {
 				if(response.data.message === 'ok') {
 					this.$Message.success('登记成功')
+					this.loadHistory();
 				}
 			})
 		},
 		cancel: function() {
 			this.visiable = false
 		},
-		goApply: function(row, status) {
+		takeoff: function(row) {
+			let reqBody = this.$qs.stringify({
+				equip_id: row.equip_id,
+				end_time: row.end_time,
+			})
+			this.$axios.post('/api/equip/request/add', reqBody, {
+				headers: { jwt: localStorage.getItem('jwt') }
+			}).then(response => {
+				if(response.data.message === 'ok') {
+					this.$Message.success('已提交上架申请')
+					this.loadHistory();
+				}
+			})
+		},
+		land: function(row) {
 			let reqBody = this.$qs.stringify({
 				equip_id: row.equip_id,
 				equip_name: row.equip_name,
 				address: row.address,
 				end_time: row.end_time,
-				status: status
+				status: 'unavailable'
 			})
 			this.$axios.post('/api/equip/set', reqBody, {
 				headers: { jwt: localStorage.getItem('jwt') }
 			}).then(response => {
 				if(response.data.message === 'ok') {
-					this.$Message.success('设备状态更新申请成功')
+					this.$Message.success('下架成功')
+					this.loadHistory();
 				}
 			})
-		}
+		},
+		goDelete: function(row) {
+			let reqBody = this.$qs.stringify({
+				equip_id: row.equip_id
+			})
+			this.$axios.post('/api/equip/delete', reqBody, {
+				headers: { jwt: localStorage.getItem('jwt') }
+			}).then(response => {
+				if(response.data.message === 'ok') {
+					this.$Message.success('设备删除成功')
+					this.loadHistory();
+				}				
+			})
+		},
 	}
 }
 </script>
 
 <style scoped>
+#header {
+	display: flex;
+	justify-content: space-between;
+}
 #search {
 	width: 30%;
 	max-width: 300px;
