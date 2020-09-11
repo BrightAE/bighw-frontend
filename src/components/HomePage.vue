@@ -5,27 +5,32 @@
 			<Layout>
 				<Sider hide-trigger :style="{background: '#fff'}">
 					<Menu :active-name=status theme="light" width="auto" :open-names="['1']" @on-select="changeActive">
-						<MenuItem name="list" >
-							上架列表
-						</MenuItem>
-						<MenuItem name="renting">
-							正在租借
-						</MenuItem>
-						<MenuItem name="history">
-							申请历史
-						</MenuItem>
-						<MenuItem name="assistant" v-if="auth === 'user'">
-							成为助理
-						</MenuItem>
-						<MenuItem name="providing" v-if="auth === 'lessor'">
-							我的设备
-						</MenuItem>
-						<MenuItem name="examine" v-if="auth === 'lessor'">
-							审核申请
-						</MenuItem>
-						<MenuItem name="renis" v-if="auth === 'lessor'">
-							出租历史
-						</MenuItem>
+						<MenuGroup title="设备租用" style="text-align: left">
+							<MenuItem name="list" style="text-align: center">
+								设备列表
+							</MenuItem>
+							<MenuItem name="renting" style="text-align: center">
+								租借历史
+							</MenuItem>
+							<MenuItem name="history" style="text-align: center">
+								申请历史
+							</MenuItem>
+							<MenuItem name="assistant" v-if="auth === 'user'" style="text-align: center">
+								成为助理
+							</MenuItem>
+						</MenuGroup>
+						<Divider v-if="auth === 'lessor'"/>
+						<MenuGroup v-if="auth === 'lessor'" title="设备管理" style="text-align: left">
+							<MenuItem name="providing" v-if="auth === 'lessor'" style="text-align: center">
+								我的设备
+							</MenuItem>
+							<MenuItem name="examine" v-if="auth === 'lessor'" style="text-align: center">
+								审核申请
+							</MenuItem>
+							<MenuItem name="renis" v-if="auth === 'lessor'" style="text-align: center">
+								出租历史
+							</MenuItem>
+						</MenuGroup>
 					</Menu>
 				</Sider>
 				<Layout :style="{padding: '12px 24px 24px'}">
