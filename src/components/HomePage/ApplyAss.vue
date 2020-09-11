@@ -1,8 +1,9 @@
 <template>
 	<div>
 		<div id="container">
-			实验室编号：<Input v-model="lab_info" clearable style="width: 200px" />
-			详情说明：<Input v-model="detail" type="textarea" maxlength="100" show-word-limit :autosize="{minRows: 2,maxRows: 5}" placeholder="Enter something..." />
+			实验室信息：<Input v-model="lab_info" clearable style="width: 400px" /> <br><br>
+			详情说明：<br>
+			<Input v-model="detail" type="textarea" maxlength="100" show-word-limit :autosize="{minRows: 2,maxRows: 5}" placeholder="Enter something..."  style="width:600px"/> <br><br>
 			<Button type="primary" @click="apply">申请</Button>
 		</div>
 	</div>

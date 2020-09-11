@@ -18,9 +18,13 @@
 					<Button v-else disabled size="small" style="margin-right: 5px">下架</Button>
 				</template>
 				<template slot-scope="{ row }" slot="action">
-					<Button v-if="row.status === 'unavailable'" type="primary" size="small" style="margin-right: 5px" @click="takeoff(row)">上架</Button>
+					<Button v-if="row.status === 'unavailable'" type="primary" size="small" style="margin-right: 5px" @click="take_vis = true">上架</Button>
 					<Button v-else-if="row.status === 'onsale'" type="primary" size="small" style="margin-right: 5px" @click="land(row)">下架</Button>
 					<Button v-if="row.status != 'rented'" type="error" size="small" style="margin-right: 5px" @click="goDelete(row)">删除</Button>
+
+					<Modal v-model="take_vis" :title="'上架申请'" @on-ok="takeoff(row)" @on-cancel="take_vis = false" ok-text="登记" width="800px">
+						截至日期<DatePicker type="date" placeholder="Select date" style="width: 200px" @on-change="endTimeChanged"></DatePicker>
+					</Modal>
 				</template>
 			</Table>
 		</div>
@@ -39,7 +43,7 @@ export default {
 			{ title: '截至日期', key: 'end_time' },
 			{ title: '设备状态', slot: 'status' },
 			{ title: '操作', slot: 'action' },
-		], rent_equip: [], visiable: false, apply: {}, page: 1, page_size: 999999, total: 0, username: '', equip_name: '', address: '' }
+		], rent_equip: [], visiable: false, apply: {}, page: 1, page_size: 999999, total: 0, username: '', equip_name: '', address: '', end_time: '',  take_vis: false}
 	},
 	mounted() {
 		this.$axios.get('api/user/info', {
@@ -70,6 +74,7 @@ export default {
 				if(response.data.message === 'ok') {
 					this.$Message.success('登记成功')
 					this.loadHistory();
+					this.take_vis = false;
 				}
 			})
 		},
@@ -79,7 +84,7 @@ export default {
 		takeoff: function(row) {
 			let reqBody = this.$qs.stringify({
 				equip_id: row.equip_id,
-				end_time: row.end_time,
+				end_time: this.end_time,
 			})
 			this.$axios.post('/api/equip/request/add', reqBody, {
 				headers: { jwt: localStorage.getItem('jwt') }
@@ -120,6 +125,9 @@ export default {
 				}				
 			})
 		},
+		endTimeChanged: function(date) {
+			this.end_time = date;
+		} 
 	}
 }
 </script>

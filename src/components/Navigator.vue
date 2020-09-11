@@ -83,14 +83,14 @@ export default {
         font-family: 'Hiragino Sans GB';
     }
     .layout-logo {
-        width: 40px;
-        height: 40px;
+        width: 48px;
+        height: 48px;
         background: url('../assets/logo.png') no-repeat;
         background-size: 100% 100%;
         border-radius: 3px;
         float: left;
         position: relative;
-        top: 12px;
+        top: 8px;
         left: 20px; 
     }
 
