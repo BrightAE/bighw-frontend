@@ -24,6 +24,9 @@
                                 <MenuItem name="auth_requests">
                                     权限申请管理
                                 </MenuItem>
+                                <MenuItem name="messages">
+                                    系统日志
+                                </MenuItem>
                             </Menu>
                     </div>
 				</Sider>
@@ -60,6 +63,8 @@
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
                         </div>
+
+
                         <div v-if='status=="equips"'>
                             <div style='display:flex;flex-direction:row;'>
                                 <Select v-model="equips_filter.status" style="width:150px" @on-change='equips_manage'>
@@ -108,6 +113,8 @@
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
                         </div>
+
+
                         <div v-if='status=="rents"'>
                             <div style='display:flex;flex-direction:row;'>
                                 <Input v-model="rents_filter.equip_id" search placeholder="设备编号" style='width:300px' @on-search='rents_manage'/>
@@ -133,6 +140,8 @@
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
                         </div>
+
+
                         <div v-if='status=="rent_requests"'>
                             <div style='display:flex;flex-direction:row;'>
                                 <Input v-model="rent_requests_filter.lessor_name" search placeholder="借方名字" style='width:200px' @on-search='rent_requests_manage'/>
@@ -161,6 +170,8 @@
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
                         </div>
+
+
                         <div v-if='status=="equip_requests"'>
                             <div style='display:flex;flex-direction:row;'>
                                 <Input v-model="equip_requests_filter.lessor_name" search placeholder="租借方名字" style='width:300px' @on-search='equip_requests_manage'/>
@@ -188,6 +199,8 @@
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
                         </div>
+
+
                         <div v-if='status=="auth_requests"'>
                             <div style='display:flex;flex-direction:row;'>
                                 <Select v-model="auth_requests_filter.status" style="width:150px" @on-change='auth_requests_manage'>
@@ -215,6 +228,16 @@
                                     <Button v-if='row.status==="pending"' type="success" size="small" style="width:120px;margin:3px;" @click="auth_requests_decide(row.auth_req_id,'apply')">通过</Button>
                                     <Button v-if='row.status==="pending"' type="error" size="small" style="width:120px;margin:3px;" @click="auth_requests_decide(row.auth_req_id,'reject')">拒绝</Button>
                                 </template>
+                            </Table>
+                            <Page :total="total" size="small" show-total @on-change='pagechange'/>
+                        </div>
+
+
+                        <div v-if='status=="messages"'>
+                            <Table :columns="[  { title: '标题', key: 'title'},
+                                                { title: '时间', key: 'time'},
+                                                { title: '内容', key: 'content'},
+                                            ]" :data="messages">
                             </Table>
                             <Page :total="total" size="small" show-total @on-change='pagechange'/>
                         </div>
@@ -249,7 +272,8 @@ export default {
             equip_requests: [],
             equip_requests_filter: {lessor_name:'',equip_name:''},
             auth_requests: [],
-            auth_requests_filter: {user_id:'',status:'all'}
+            auth_requests_filter: {user_id:'',status:'all'},
+            messages: []
         }
     },
     mounted: function () {
@@ -298,6 +322,9 @@ export default {
                 case 'auth_requests':
                     _this.auth_requests_manage();
                     break;
+                case 'messages':
+                    _this.messages_manage();
+                    break;
             }
         },
         pagechange(new_page){
@@ -322,8 +349,13 @@ export default {
                 case 'auth_requests':
                     _this.auth_requests_manage();
                     break;
+                case 'messages':
+                    _this.messages_manage();
+                    break;
             }
         },
+
+
         users_manage() {    
             let _this=this;
             let par={
@@ -413,6 +445,8 @@ export default {
             }).catch(() => {
             });
         },
+
+
         equips_manage() {
             let _this=this;
             let par={
@@ -502,6 +536,8 @@ export default {
             }).catch(() => {
             });
         },
+
+
         rents_manage() {
             let _this=this;
             let par={
@@ -555,6 +591,8 @@ export default {
             }).catch(() => {
             });
         },
+
+
         equip_requests_manage() {
             let _this=this;
             let par={
@@ -613,6 +651,8 @@ export default {
             }).catch(() => {
             });
         },
+
+
         auth_requests_manage() {
             let _this=this;
             let par={
@@ -668,6 +708,31 @@ export default {
                     });
                 }
                 _this.auth_requests_manage();
+            }).catch(() => {
+            });
+        },
+
+
+        messages_manage() {
+            let _this=this;
+            let par={
+                type: 'sys',
+                to_id: 0,
+                page:_this.page,
+                page_size:_this.size,
+            };
+            _this.$axios(
+                {
+                    method: 'get',
+                    url: '/api/user/message/query',
+                    params: par,
+                    headers: {
+                        jwt: localStorage.getItem('jwt')
+                    }
+                }
+            ).then(Response => {
+                _this.total=Response.data.total;
+                _this.messages=Response.data.message_list;
             }).catch(() => {
             });
         }
