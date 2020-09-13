@@ -12,7 +12,7 @@
 <script>
 export default {
 	data() {
-		return { user_id: 0, page: 1, page_size: 999999, total: 0, message: [], type: 'user' }
+		return { user_id: 0, page: 1, page_size: 999999, total: 0, message: [], type: 'lessor' }
 	},
 	mounted() {
 		this.$axios.get('/api/user/info', {

@@ -10,8 +10,9 @@
 		<div id="tabel">
 			<Table :columns="tablehead" :data="rent_his">
 				<template slot-scope="{ row }" slot="status">
-					<Button v-if="row.status === 'returned'" type="success" size="small" style="margin-right: 5px" >已归还</Button>
-					<Button v-else-if="row.status === 'unreturned'" type="error" size="small" style="margin-right: 5px" >未归还</Button>
+					<Button v-if="row.status === 'returned'" type="primary" size="small" style="margin-right: 5px" >未评价</Button>
+					<Button v-if="row.status === 'unreturned'" type="error" size="small" style="margin-right: 5px" >未归还</Button>
+					<Button v-if="row.status === 'evaluated'" type="success" size="small" style="margin-right: 5px" >已评价</Button>
 				</template>
 				<template slot-scope="{ row }" slot="action">
 					<Button v-if="row.status === 'unreturned'" type="success" size="small" style="margin-right: 5px" @click="goReturn(row)">确认归还</Button>

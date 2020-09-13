@@ -60,8 +60,8 @@
 						<rent-history v-if="status === 'renis'"></rent-history>
 						<apply-rent v-if="status === 'providing'"></apply-rent>
 						<apply-ass v-if="status === 'assistant'"></apply-ass>
-						<message v-if="status === 'message_user'" type='user'></message>
-						<message v-if="status === 'message_lessor'" type='lessor'></message>
+						<message v-if="status === 'message_user'"></message>
+						<messagebb v-if="status === 'message_lessor'"></messagebb>
 						<statictis v-if="status === 'statistics'"></statictis>
 					</Content>
 				</Layout>
@@ -80,6 +80,7 @@ import RentHistory from './HomePage/RentHistory.vue'
 import ApplyRent from './HomePage/ApplyRent.vue'
 import ApplyAss from './HomePage/ApplyAss.vue'
 import Message from './Message.vue'
+import Messagebb from './Messagebb.vue'
 import Statictis from './Statistics.vue'
 
 export default {
@@ -104,6 +105,7 @@ export default {
 		ApplyAss,
 		Message,
 		Statictis,
+		Messagebb,
 	},
 	methods: {
 		changeActive(name) {
