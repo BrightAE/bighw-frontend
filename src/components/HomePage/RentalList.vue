@@ -16,7 +16,7 @@
 			<Select style="width: 200px" @on-change="sortKeyChanged" placeholder="排序">
 				<Option value="end_time">截至日期</Option>
 				<Option value="equip_name">设备名称</Option>
-				<Option value="equip_id">设备编号</Option>
+				<Option value="id">设备编号</Option>
 			</Select>
 		</div>
 		<div id="tabel">
@@ -94,7 +94,7 @@ export default {
 			if(this.searched_name != '')
 				reqParams.name_search = this.searched_name
 			if(this.searched_user != '')
-				reqParams.username = this.searched_user
+				reqParams.lessor_name = this.searched_user
 			if(this.sort_key != 'id')
 				reqParams.ordered_by = this.sort_key 
 			this.$axios.get('api/equip/query', {

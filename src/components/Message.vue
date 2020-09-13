@@ -1,14 +1,11 @@
 <template>
-	<div>
+	<div style="text-align: left">
 		<br><br>
-		<List header='消息列表' border style="text-align: left;">
-			<ListItem v-for="(msg, i) in message" :key="i" :title="msg.title" :descrption="msg.from">
-				{{ msg.content }}
-				<template slot="action">
-					{{ msg.time }}
-				</template>
-			</ListItem>
-		</List>
+		<Card v-for="(msg, i) in message" :key="i">
+			<h3 slot="title">来自：{{ msg.from }}</h3>
+			<strong>{{ msg.title }}：</strong> {{ msg.content }}
+			<div style="font-size: 12px; text-align:right;">{{ msg.time }}</div>
+		</Card>
 	</div>
 </template>
 
@@ -33,6 +30,7 @@ export default {
 				params: { page: this.page, page_size: this.page_size, to_id: this.user_id, type: this.type }
 			}).then(response => {
 				this.total = response.data.total;
+				console.log(response.data.message_list)
 				this.message = response.data.message_list;
 			})
 		}

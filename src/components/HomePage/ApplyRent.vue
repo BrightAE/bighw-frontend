@@ -13,6 +13,13 @@
 			设备名称：<Input v-model="equip_name" clearable style="width: 300px;" size="large" /> <br><br>
 			设备地址：<Input v-model="address" clearable style="width: 300px;" size="large" />
 		</Modal>
+		<Modal v-model="change_vis" :title="'修改设备信息'" @on-ok="change" @on-cancel="change_vis = false" ok-text="登记" width="800px">
+			设备名称：<Input v-model="change_row.equip_name" clearable style="width: 300px;" size="large" /> <br><br>
+			设备地址：<Input v-model="change_row.address" clearable style="width: 300px;" size="large" />
+		</Modal>
+		<Modal v-model="take_vis" :title="'上架申请'" @on-ok="takeoff" @on-cancel="take_vis = false" ok-text="登记" width="800px">
+			截至日期<DatePicker type="date" placeholder="Select date" style="width: 200px" @on-change="endTimeChanged"></DatePicker>
+		</Modal>
 		<div id="tabel">
 			<Table :columns="tablehead" :data="rent_equip">
 				<template slot-scope="{ row }" slot="status">
@@ -23,11 +30,8 @@
 				<template slot-scope="{ row }" slot="action">
 					<Button v-if="row.status === 'unavailable'" type="primary" size="small" style="margin-right: 5px" @click="take_vis = true; take_id = row.equip_id">上架</Button>
 					<Button v-else-if="row.status === 'onsale'" type="primary" size="small" style="margin-right: 5px" @click="land(row)">下架</Button>
+					<Button v-if="row.status != 'rented'" type="warning" size="small" style="margin-right: 5px" @click="change_vis = true; change_row = row">修改</Button>
 					<Button v-if="row.status != 'rented'" type="error" size="small" style="margin-right: 5px" @click="goDelete(row)">删除</Button>
-
-					<Modal v-model="take_vis" :title="'上架申请'" @on-ok="takeoff" @on-cancel="take_vis = false" ok-text="登记" width="800px">
-						截至日期<DatePicker type="date" placeholder="Select date" style="width: 200px" @on-change="endTimeChanged"></DatePicker>
-					</Modal>
 				</template>
 			</Table>
 		</div>
@@ -39,14 +43,16 @@
 export default {
 	data() {
 		return { tablehead: [
-			{ title: '设备编号', key: 'equip_id', sortable: true },
-			{ title: '设备名称', key: 'equip_name', sortable: true },
-			{ title: '提供者', key: 'lessor_name', sortable: true },
+			{ title: '设备编号', key: 'equip_id' },
+			{ title: '设备名称', key: 'equip_name' },
+			{ title: '地址', key: 'address' },
+			{ title: '提供者', key: 'lessor_name' },
 			{ title: '使用者', key: 'username' },
 			{ title: '截至日期', key: 'end_time' },
 			{ title: '设备状态', slot: 'status' },
 			{ title: '操作', slot: 'action' },
-		], rent_equip: [], visiable: false, apply: {}, page: 1, page_size: 10, total: 0, username: '', equip_name: '', address: '', end_time: '',  take_vis: false, take_id: 0 }
+		], rent_equip: [], visiable: false, apply: {}, page: 1, page_size: 10, total: 0, username: '', 
+		equip_name: '', address: '', end_time: '',  take_vis: false, take_id: 0, change_vis: false, change_row: {} }
 	},
 	mounted() {
 		this.$axios.get('api/user/info', {
@@ -143,6 +149,23 @@ export default {
 			this.selected_status = selected
 			this.loadEquipments()
 		},
+		change: function() {
+			let reqBody = this.$qs.stringify({
+				equip_id: this.change_row.equip_id,
+				equip_name: this.change_row.equip_name,
+				address: this.change_row.address,
+				end_time: this.change_row.end_time,
+				status: 'unavailable'
+			})
+			this.$axios.post('/api/equip/set', reqBody, {
+				headers: { jwt: localStorage.getItem('jwt') }
+			}).then(response => {
+				if(response.data.message === 'ok') {
+					this.$Message.success('修改设备信息成功')
+					this.loadEquipments();
+				}
+			})			
+		}
 	}
 }
 </script>

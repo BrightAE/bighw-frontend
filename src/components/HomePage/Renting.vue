@@ -10,8 +10,9 @@
 		<div id="tabel">
 			<Table :columns="tablehead" :data="renting">
 				<template slot-scope="{ row }" slot="status">
-					<Button v-if="row.status === 'unreturned'" type="error" size="small" style="margin-right: 5px" >未归还</Button>
-					<Button v-else type="success" size="small" style="margin-right: 5px" >已归还</Button>
+					<Button v-if="row.status === 'unreturned' && row.return_time === date" type="error" size="small" style="margin-right: 5px" >仅剩一天</Button>
+					<Button v-if="row.status === 'unreturned' && row.return_time != date" type="warning" size="small" style="margin-right: 5px" >未归还</Button>
+					<Button v-if="row.status === 'returned'" type="success" size="small" style="margin-right: 5px" >已归还</Button>
 				</template>
 			</Table>
 		</div>
@@ -30,13 +31,15 @@ export default {
 			{ title: '租借日期', key: 'rent_time' },
 			{ title: '截至日期', key: 'return_time' },
 			{ title: '使用状态', slot: 'status' },
-		], renting: [], visiable: false, apply: {}, page: 1, page_size: 10, total: 0, username: '', selected_status: 'all' }
+		], renting: [], visiable: false, apply: {}, page: 1, page_size: 10, total: 0, username: '', selected_status: 'all', date: '' }
 	},
 	mounted() {
 		this.$axios.get('api/user/info', {
 			headers: { jwt: localStorage.getItem('jwt') }
 		}).then(response => {
 			this.username = response.data.username
+			this.date = response.data.local_date
+			console.log(this.date)
 			this.loadRented()
 		})
 	},
