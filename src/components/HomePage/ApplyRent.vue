@@ -79,7 +79,7 @@ export default {
 			}).then(response => {
 				if(response.data.message === 'ok') {
 					this.$Message.success('登记成功')
-					this.loadHistory();
+					this.loadEquipments();
 					this.take_vis = false;
 				}
 			})
@@ -97,7 +97,7 @@ export default {
 			}).then(response => {
 				if(response.data.message === 'ok') {
 					this.$Message.success('已提交上架申请')
-					this.loadHistory();
+					this.loadEquipments();
 				}
 			})
 		},
@@ -114,7 +114,7 @@ export default {
 			}).then(response => {
 				if(response.data.message === 'ok') {
 					this.$Message.success('下架成功')
-					this.loadHistory();
+					this.loadEquipments();
 				}
 			})
 		},
@@ -127,7 +127,7 @@ export default {
 			}).then(response => {
 				if(response.data.message === 'ok') {
 					this.$Message.success('设备删除成功')
-					this.loadHistory();
+					this.loadEquipments();
 				}				
 			})
 		},

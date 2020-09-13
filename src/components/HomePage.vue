@@ -60,7 +60,8 @@
 						<rent-history v-if="status === 'renis'"></rent-history>
 						<apply-rent v-if="status === 'providing'"></apply-rent>
 						<apply-ass v-if="status === 'assistant'"></apply-ass>
-						<message v-if="status === 'message_user'"></message>
+						<message v-if="status === 'message_user'" :type='user'></message>
+						<message v-if="status === 'message_lessor'" :type='lessor'></message>
 						<statictis v-if="status === 'statistics'"></statictis>
 					</Content>
 				</Layout>

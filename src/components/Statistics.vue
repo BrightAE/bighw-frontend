@@ -70,11 +70,11 @@ export default {
 		} }
 	},
 	mounted() {
-		// this.$axios.get('/api/user/statistics/query', {
-		// 	headers: { jwt: localStorage.getItem('jwt') }
-		// }).then(response => {
-		// 	this.info = response.data
-		// })
+		this.$axios.get('/api/user/statistics/query', {
+			headers: { jwt: localStorage.getItem('jwt') }
+		}).then(response => {
+			this.info = response.data
+		})
 	}
 }
 </script>

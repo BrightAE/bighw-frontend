@@ -17,6 +17,7 @@ export default {
 	data() {
 		return { user_id: 0, page: 1, page_size: 999999, total: 0, message: [] }
 	},
+	props: ['type'],
 	mounted() {
 		this.$axios.get('/api/user/info', {
 			headers: { jwt: localStorage.getItem('jwt') }
@@ -29,7 +30,7 @@ export default {
 		loadMessage: function() {
 			this.$axios.get('/api/user/message/query', {
 				headers: { jwt: localStorage.getItem('jwt') },
-				params: { page: this.page, page_size: this.page_size, to_id: this.user_id, type: 'user' }
+				params: { page: this.page, page_size: this.page_size, to_id: this.user_id, type: this.type }
 			}).then(response => {
 				this.total = response.data.total;
 				this.message = response.data.message_list;

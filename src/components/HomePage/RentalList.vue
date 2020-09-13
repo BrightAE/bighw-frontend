@@ -2,16 +2,21 @@
 	<div id="container">
 		<div id="header">
 			<div class="search" style="margin-right: 5px">
-				<Input search placeholder="设备名称" @on-change="nameChanged"/>
+				<Input search placeholder="设备名称" @on-search="nameChanged"/>
 			</div>
 			<div class="search" style="margin-right: 5px">
-				<Input search placeholder="提供者" @on-change="userChanged"/>
+				<Input search placeholder="提供者" @on-search="userChanged"/>
 			</div>
-			<Select style="width: 200px" @on-change="selectedChanged" placeholder="状态">
+			<Select style="width: 200px; margin-right: 5px" @on-change="selectedChanged" placeholder="状态">
 				<Option value="all">全部</Option>
 				<Option value="onsale">可租</Option>
 				<Option value="rented">已租</Option>
 				<Option value="unavailable">下架</Option>
+			</Select>
+			<Select style="width: 200px" @on-change="sortKeyChanged" placeholder="排序">
+				<Option value="end_time">截至日期</Option>
+				<Option value="equip_name">设备名称</Option>
+				<Option value="equip_id">设备编号</Option>
 			</Select>
 		</div>
 		<div id="tabel">
@@ -51,7 +56,7 @@ export default {
 			{ title: '联系方式', key: 'contact' },
 			{ title: '设备状态', slot: 'status' },
 			{ title: '操作', slot: 'action'}
-		], equipdata: [], visiable: false, apply: {}, page: 1, page_size: 10, total: 0, searched_name: null, searched_user: null, selected_status: 'all' }
+		], equipdata: [], visiable: false, apply: {}, page: 1, page_size: 10, total: 0, searched_name: null, searched_user: null, selected_status: 'all', sort_key: 'id' }
 	},
 	mounted: function() {
 		this.loadEquipments()
@@ -86,10 +91,12 @@ export default {
 			let reqParams = { page: this.page, page_size: this.page_size }
 			if(this.selected_status != "all")
 				reqParams.status = this.selected_status
-			if(this.searched_name != null)
+			if(this.searched_name != '')
 				reqParams.name_search = this.searched_name
-			if(this.searched_user != null)
+			if(this.searched_user != '')
 				reqParams.username = this.searched_user
+			if(this.sort_key != 'id')
+				reqParams.ordered_by = this.sort_key 
 			this.$axios.get('api/equip/query', {
 				headers: { jwt: localStorage.getItem('jwt') },
 				params: reqParams
@@ -115,12 +122,17 @@ export default {
 		},
 		nameChanged: function(text) {
 			this.page = 1
-			this.searched_name = text.data
+			this.searched_name = text
 			this.loadEquipments()
 		},
 		userChanged: function(text) {
 			this.page = 1
-			this.searched_user = text.data
+			this.searched_user = text
+			this.loadEquipments()
+		},
+		sortKeyChanged: function(selected) {
+			this.page = 1
+			this.sort_key = selected
 			this.loadEquipments()
 		}
 	

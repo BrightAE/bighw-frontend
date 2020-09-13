@@ -56,7 +56,12 @@ export default {
 		pageChanged: function(page) {
 			this.page = page
 			this.loadRented()
-		}
+		},
+		selectedChanged: function(selected) {
+			this.page = 1
+			this.selected_status = selected
+			this.loadRented()
+		},
 
 	}
 }

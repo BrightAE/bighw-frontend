@@ -59,6 +59,11 @@ export default {
 			this.page = page
 			this.loadHistory()
 		},
+		selectedChanged: function(selected) {
+			this.page = 1
+			this.selected_status = selected
+			this.loadHistory()
+		},
 	}
 }
 </script>
