@@ -18,6 +18,14 @@
 							<MenuItem name="assistant" v-if="auth === 'user'" style="text-align: center">
 								成为助理
 							</MenuItem>
+							
+							<MenuItem name="message_user" style="text-align: center">
+								<Badge :count="3" dot>
+									消息通知
+								</Badge>
+							</MenuItem>
+							
+
 						</MenuGroup>
 						<Divider v-if="auth === 'lessor'"/>
 						<MenuGroup v-if="auth === 'lessor'" title="设备管理" style="text-align: left">
@@ -29,6 +37,16 @@
 							</MenuItem>
 							<MenuItem name="renis" v-if="auth === 'lessor'" style="text-align: center">
 								出租历史
+							</MenuItem>
+							<MenuItem name="message_lessor" style="text-align: center">
+								<Badge :count="3" dot>
+									消息通知
+								</Badge>
+							</MenuItem>
+						</MenuGroup>
+						<MenuGroup title="关于" style="text-align: left">
+							<MenuItem name="statistics" style="text-align: center">
+								统计信息
 							</MenuItem>
 						</MenuGroup>
 					</Menu>
@@ -42,6 +60,8 @@
 						<rent-history v-if="status === 'renis'"></rent-history>
 						<apply-rent v-if="status === 'providing'"></apply-rent>
 						<apply-ass v-if="status === 'assistant'"></apply-ass>
+						<message v-if="status === 'message_user'"></message>
+						<statictis v-if="status === 'statistics'"></statictis>
 					</Content>
 				</Layout>
 			</Layout>
@@ -58,6 +78,8 @@ import Renting from './HomePage/Renting.vue'
 import RentHistory from './HomePage/RentHistory.vue'
 import ApplyRent from './HomePage/ApplyRent.vue'
 import ApplyAss from './HomePage/ApplyAss.vue'
+import Message from './Message.vue'
+import Statictis from './Statistics.vue'
 
 export default {
 	data() {
@@ -79,6 +101,8 @@ export default {
 		RentHistory,
 		ApplyRent,
 		ApplyAss,
+		Message,
+		Statictis,
 	},
 	methods: {
 		changeActive(name) {

@@ -1,9 +1,12 @@
 <template>
 	<div>
 		<div id="header">
-			<div id="search">
-				<Input search placeholder="Enter something..." />
-			</div>
+			<Select style="width: 200px; margin-right: 5px" @on-change="selectedChanged" placeholder="状态" >
+				<Option value="all">全部</Option>
+				<Option value="onsale">可租</Option>
+				<Option value="rented">已租</Option>
+				<Option value="unavailable">下架</Option>
+			</Select>
 			<Button type="primary" @click="visiable = true">设备登记</Button>
 		</div>
 		<Modal v-model="visiable" :title="'设备登记'" @on-ok="submit" @on-cancel="cancel" ok-text="登记" width="800px">
@@ -18,17 +21,17 @@
 					<Button v-else disabled size="small" style="margin-right: 5px">下架</Button>
 				</template>
 				<template slot-scope="{ row }" slot="action">
-					<Button v-if="row.status === 'unavailable'" type="primary" size="small" style="margin-right: 5px" @click="take_vis = true">上架</Button>
+					<Button v-if="row.status === 'unavailable'" type="primary" size="small" style="margin-right: 5px" @click="take_vis = true; take_id = row.equip_id">上架</Button>
 					<Button v-else-if="row.status === 'onsale'" type="primary" size="small" style="margin-right: 5px" @click="land(row)">下架</Button>
 					<Button v-if="row.status != 'rented'" type="error" size="small" style="margin-right: 5px" @click="goDelete(row)">删除</Button>
 
-					<Modal v-model="take_vis" :title="'上架申请'" @on-ok="takeoff(row)" @on-cancel="take_vis = false" ok-text="登记" width="800px">
+					<Modal v-model="take_vis" :title="'上架申请'" @on-ok="takeoff" @on-cancel="take_vis = false" ok-text="登记" width="800px">
 						截至日期<DatePicker type="date" placeholder="Select date" style="width: 200px" @on-change="endTimeChanged"></DatePicker>
 					</Modal>
 				</template>
 			</Table>
 		</div>
-		<div id="page"><Page :total="total" size="small" show-total /></div>
+		<div id="page"><Page :total="total" size="small" show-total @on-change="pageChanged"/></div>
 	</div>
 </template>
 
@@ -43,25 +46,28 @@ export default {
 			{ title: '截至日期', key: 'end_time' },
 			{ title: '设备状态', slot: 'status' },
 			{ title: '操作', slot: 'action' },
-		], rent_equip: [], visiable: false, apply: {}, page: 1, page_size: 999999, total: 0, username: '', equip_name: '', address: '', end_time: '',  take_vis: false}
+		], rent_equip: [], visiable: false, apply: {}, page: 1, page_size: 10, total: 0, username: '', equip_name: '', address: '', end_time: '',  take_vis: false, take_id: 0 }
 	},
 	mounted() {
 		this.$axios.get('api/user/info', {
 			headers: { jwt: localStorage.getItem('jwt') }
 		}).then(response => {
 			this.username = response.data.username
-			this.loadHistory()
+			this.loadEquipments()
 		})
 	},
 	methods: {
-		loadHistory: function() {
-			this.$axios.get('/api/equip/query', {
+		loadEquipments: function() {
+			let reqParams = { page: this.page, page_size: this.page_size, lessor_name: this.username }
+			if(this.selected_status != "all")
+				reqParams.status = this.selected_status
+			this.$axios.get('api/equip/query', {
 				headers: { jwt: localStorage.getItem('jwt') },
-				params: { page: this.page, page_size: this.page_size, lessor_name: this.username }
+				params: reqParams
 			}).then(response => {
-				this.total = response.data.total;
-				this.rent_equip = response.data.equip
-			})
+				this.total = response.data.total
+				this.rent_equip = response.data.equip;
+			}) 
 		},
 		submit: function() {
 			let reqBody = this.$qs.stringify({
@@ -81,9 +87,9 @@ export default {
 		cancel: function() {
 			this.visiable = false
 		},
-		takeoff: function(row) {
+		takeoff: function() {
 			let reqBody = this.$qs.stringify({
-				equip_id: row.equip_id,
+				equip_id: this.take_id,
 				end_time: this.end_time,
 			})
 			this.$axios.post('/api/equip/request/add', reqBody, {
@@ -127,7 +133,16 @@ export default {
 		},
 		endTimeChanged: function(date) {
 			this.end_time = date;
-		} 
+		},
+		pageChanged: function(page) {
+			this.page = page
+			this.loadEquipments()
+		},
+		selectedChanged: function(selected) {
+			this.page = 1
+			this.selected_status = selected
+			this.loadEquipments()
+		},
 	}
 }
 </script>
@@ -135,13 +150,10 @@ export default {
 <style scoped>
 #header {
 	display: flex;
-	justify-content: space-between;
+	flex-direction: row;
+	margin: 0 0 10px 10px;
 }
-#search {
-	width: 30%;
-	max-width: 300px;
-	margin: 10px;
-}
+
 #page {
 	margin: 10px;
 	font-size: 18px;

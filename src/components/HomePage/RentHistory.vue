@@ -1,9 +1,11 @@
 <template>
 	<div>
 		<div id="header">
-			<div id="search">
-				<Input search placeholder="Enter something..." />
-			</div>
+			<Select style="width: 200px" @on-change="selectedChanged" placeholder="状态">
+				<Option value="all">全部</Option>
+				<Option value="returned">已归还</Option>
+				<Option value="unreturned">未归还</Option>
+			</Select>
 		</div>
 		<div id="tabel">
 			<Table :columns="tablehead" :data="rent_his">
@@ -16,7 +18,7 @@
 				</template>
 			</Table>
 		</div>
-		<div id="page"><Page :total="total" size="small" show-total /></div>
+		<div id="page"><Page :total="total" size="small" show-total @on-change="pageChanged" /></div>
 	</div>
 </template>
 
@@ -32,7 +34,7 @@ export default {
 			{ title: '归还日期', key: 'return_time' },
 			{ title: '状态', slot: 'status' },
 			{ title: '操作', slot: 'action' },
-		], rent_his: [], visiable: false, apply: {}, page: 1, page_size: 999999, total: 0, username: '' }
+		], rent_his: [], visiable: false, apply: {}, page: 1, page_size: 10, total: 0, username: '', selected_status: 'all' }
 	},
 	mounted() {
 		this.$axios.get('api/user/info', {
@@ -44,9 +46,12 @@ export default {
 	},
 	methods: {
 		loadHistory: function() {
+			let reqParams = { page: this.page, page_size: this.page_size, lessor_name: this.username }
+			if(this.selected_status != "all")
+				reqParams.status = this.selected_status
 			this.$axios.get('/api/rent/query', {
 				headers: { jwt: localStorage.getItem('jwt') },
-				params: { page: this.page, page_size: this.page_size, lessor_name: this.username }
+				params: reqParams
 			}).then(response => {
 				this.total = response.data.total;
 				this.rent_his = response.data.rent_info
@@ -64,17 +69,27 @@ export default {
 					this.loadHistory();
 				}
 			})
-		}
+		},
+		pageChanged: function(page) {
+			this.page = page
+			this.loadHistory()
+		},
+		selectedChanged: function(selected) {
+			this.page = 1
+			this.selected_status = selected
+			this.loadHistory()
+		},
 	}
 }
 </script>
 
 <style scoped>
-#search {
-	width: 30%;
-	max-width: 300px;
-	margin: 10px;
+#header {
+	display: flex;
+	flex-direction: row;
+	margin: 0 0 10px 10px;
 }
+
 #page {
 	margin: 10px;
 	font-size: 18px;
