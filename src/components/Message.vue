@@ -30,7 +30,6 @@ export default {
 				params: { page: this.page, page_size: this.page_size, to_id: this.user_id, type: this.type }
 			}).then(response => {
 				this.total = response.data.total;
-				console.log(response.data.message_list)
 				this.message = response.data.message_list;
 			})
 		}

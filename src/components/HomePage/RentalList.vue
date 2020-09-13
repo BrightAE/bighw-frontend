@@ -29,6 +29,9 @@
 				<template slot-scope="{ row }" slot="action">
 					<Button v-if="row.status === 'onsale'" type="primary" size="small" style="margin-right: 5px" @click="goApply(row)">申请租赁</Button>
 				</template>
+				<template slot-scope="{ row }" slot="rate">
+					<Rate disabled show-text v-model="row.score" />
+				</template>
 			</Table>
 		</div>
 		<div id="page"><Page :total="total" size="small" show-total @on-change="pageChanged"/></div>
@@ -40,6 +43,12 @@
 			租借时间：<DatePicker type="date" placeholder="Select date" style="width: 200px" @on-change="startTimeChanged"></DatePicker>
 			归还时间：<DatePicker type="date" placeholder="Select date" style="width: 200px" @on-change="returnTimeChanged"></DatePicker>
 			<br><br>
+			<h1>用户评价</h1>
+			<Card v-for="(evaluate, i) in evaluate_list" :key="i">
+				<strong>来自：{{ evaluate.username }}：</strong> {{ evaluate.content }}<br>
+				<Rate disabled show-text v-model="evaluate.score" />
+				<div style="font-size: 12px; text-align:right;">{{ evaluate.time }}</div>
+			</Card>		
 		</Modal>
 	</div>
 </template>
@@ -55,18 +64,26 @@ export default {
 			{ title: '截至日期', key: 'end_time' },
 			{ title: '联系方式', key: 'contact' },
 			{ title: '设备状态', slot: 'status' },
-			{ title: '操作', slot: 'action'}
-		], equipdata: [], visiable: false, apply: {}, page: 1, page_size: 10, total: 0, searched_name: null, searched_user: null, selected_status: 'all', sort_key: 'id' }
+			{ title: '操作', slot: 'action'},
+			{ title: '评分', slot: 'rate'}
+		], equipdata: [], visiable: false, apply: {}, page: 1, page_size: 10, total: 0, searched_name: null, searched_user: null, selected_status: 'all', sort_key: 'id', evaluate_list: [] }
 	},
 	mounted: function() {
 		this.loadEquipments()
 	},
 	methods: {
 		goApply: function(equip) {
-			this.apply = equip
-			this.apply.detail = ''
-			this.apply.contact = ''
-			this.visiable = true;
+			let reqParams = { equip_id: equip.equip_id }
+			this.$axios.get('/api/user/evaluation/query', {
+				headers: { jwt: localStorage.getItem('jwt') },
+				params: reqParams
+			}).then(response => {
+				this.evaluate_list = response.data.evaluation_list
+				this.apply = equip
+				this.apply.detail = ''
+				this.apply.contact = ''
+				this.visiable = true;
+			})
 		},
 		submit: function(apply) {
 			let reqBody = this.$qs.stringify({
